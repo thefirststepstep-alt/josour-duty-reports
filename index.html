@@ -4,27 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>نظام تقارير المداومة | نادي جسور</title>
+  
+  <!-- خط تجوال و كايرو العصري باللغة العربية -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <!-- تيليجرام ويب آب SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- Firebase Cloud Firestore SDK (v9 compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
+    
+    <!-- رأس التطبيق والهوية -->
     <header class="app-header">
       <div class="header-logo-wrapper">
-        <img src="logo.png" alt="شعار نادي جسور الطلابي" class="header-logo">
+        <img id="clubAppLogo" src="logo.png" alt="شعار نادي جسور الطلابي" class="header-logo">
+        <label for="logoFileInput" class="logo-change-btn" title="تغيير الشعار يدوياً">
+          <span>📷</span>
+          <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
+        </label>
       </div>
       <div class="header-badge">🏛️ نادي جسور الطلابي — كلية العلوم الإسلامية</div>
       <h1 class="header-title">📋 تقرير المداومة الذكي</h1>
       <p class="header-subtitle">خلية المداومة والعمليات • نظام التوثيق والأرشفة الفوري</p>
+      
+      <!-- مؤشر الاتصال بقاعدة بيانات Firebase -->
       <div class="db-status-pill">
         <span class="db-dot"></span>
         <span>قاعدة بيانات Firebase Firestore متصلة 🔥 (josour-djard)</span>
       </div>
+
+      <!-- شريط معلومات اليوم والتاريخ التلقائي -->
       <div class="meta-strip">
         <div class="meta-item">
           <span class="meta-icon">📅</span>
@@ -40,6 +57,8 @@
         </div>
       </div>
     </header>
+
+    <!-- شريط التبديل بين الفترة الصباحية والمسائية -->
     <div class="shift-tabs-container">
       <div class="shift-tabs">
         <button type="button" class="shift-tab active" id="tabMorning" data-shift="morning">
@@ -58,7 +77,11 @@
         </button>
       </div>
     </div>
+
+    <!-- النموذج الرئيسي لتقرير المداومة -->
     <form id="dutyReportForm" novalidate>
+      
+      <!-- بيانات المداومين والتوقيت -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">👥</div>
@@ -67,11 +90,13 @@
             <p>سجل اسم المداوم الرئيسي والمساعد والفترة الزمنية (قابلة للتعديل)</p>
           </div>
         </div>
+
         <div class="form-grid">
           <div class="form-group">
             <label for="primaryMember" class="field-label required-label">👤 المداوم الرئيسي</label>
             <input type="text" id="primaryMember" class="form-control" placeholder="اكتب اسم المداوم الرئيسي..." required>
           </div>
+
           <div class="form-group time-range-group">
             <label class="field-label">⏰ وقت المداومة (الرئيسي - قابل للتعديل)</label>
             <div class="time-inputs">
@@ -81,10 +106,12 @@
               <input type="time" id="primaryTimeTo" class="form-control time-input" value="12:45">
             </div>
           </div>
+
           <div class="form-group">
             <label for="assistantMember" class="field-label">👥 المداوم المساعد (إن وجد)</label>
             <input type="text" id="assistantMember" class="form-control" placeholder="اسم المداوم المساعد (اختياري)">
           </div>
+
           <div class="form-group time-range-group">
             <label class="field-label">⏰ وقت المداومة (المساعد - قابل للتعديل)</label>
             <div class="time-inputs">
@@ -96,6 +123,8 @@
           </div>
         </div>
       </section>
+
+      <!-- 1. الجاهزية والعتاد -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">🏢</div>
@@ -104,6 +133,8 @@
             <p>فحص سلامة المعدات وشحن الأجهزة الكهربائية</p>
           </div>
         </div>
+
+        <!-- حالة العتاد -->
         <div class="form-group">
           <label class="field-label">حالة العتاد والمقر</label>
           <div class="radio-pill-group" role="radiogroup" aria-label="حالة العتاد">
@@ -122,12 +153,17 @@
               </span>
             </label>
           </div>
+
+          <!-- خانة التوضيح الشرطية إذا وجد خلل -->
           <div class="conditional-box is-hidden" id="equipmentDefectBox">
             <label for="equipmentDefectDetails" class="field-label warning-text">⚠️ يرجى توضيح تفاصيل الخلل أو النقص في العتاد:</label>
             <textarea id="equipmentDefectDetails" class="form-control form-textarea" rows="2" placeholder="اذكر ما هو الغرض المعطل أو الناقص وسببه بالتفصيل..."></textarea>
           </div>
         </div>
+
         <div class="divider-line"></div>
+
+        <!-- شحن الأجهزة -->
         <div class="form-group">
           <label class="field-label">شحن الأجهزة والبطاريات 🔌</label>
           <div class="radio-pill-group">
@@ -146,16 +182,21 @@
               </span>
             </label>
           </div>
+
+          <!-- تفاصيل الشحن أو سبب عدم الشحن -->
           <div class="conditional-box" id="chargingDetailsBox">
             <label for="chargingChargedItems" class="field-label text-muted">الأجهزة التي تم شحنها:</label>
             <input type="text" id="chargingChargedItems" class="form-control" placeholder="مثال: الميكروفونات، الحاسوب، بنك الطاقة...">
           </div>
+
           <div class="conditional-box is-hidden" id="chargingReasonBox">
             <label for="chargingNotChargedReason" class="field-label warning-text">❌ وضح سبب عدم الشحن:</label>
             <textarea id="chargingNotChargedReason" class="form-control form-textarea" rows="2" placeholder="لماذا لم يتم شحن الأجهزة؟"></textarea>
           </div>
         </div>
       </section>
+
+      <!-- 2. الاستقبال والتوصيات -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">📥</div>
@@ -164,10 +205,13 @@
             <p>توثيق الزوار والوفود والطلبات الواردة للمقر</p>
           </div>
         </div>
+
         <div class="form-group">
           <textarea id="receptionNotes" class="form-control form-textarea" rows="2" placeholder="اكتب ملخص الزيارات أو الاستفسارات التي تمت خلال فترتك (إن وجدت)..."></textarea>
         </div>
       </section>
+
+      <!-- 3. الإعارة والاسترجاع -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">📦</div>
@@ -176,6 +220,7 @@
             <p>توثيق تسليم واستلام مقتنيات ومعدات النادي</p>
           </div>
         </div>
+
         <div class="form-group">
           <div class="toggle-switch-wrapper">
             <label class="switch">
@@ -184,6 +229,8 @@
             </label>
             <span class="switch-label-text">هل تمت أي عملية إعارة أو استرجاع عتاد اليوم؟</span>
           </div>
+
+          <!-- تفاصيل الإعارة والاسترجاع الشرطية -->
           <div class="conditional-box is-hidden" id="loanDetailsBox">
             <div class="sub-form-grid">
               <div class="form-group">
@@ -195,6 +242,7 @@
                 <input type="text" id="loanReturnedItem" class="form-control" placeholder="اسم الغرض المسترجع...">
               </div>
             </div>
+
             <div class="form-group mt-2">
               <label class="field-label">هل نُفّذ بروتوكول الإعارة والاسترجاع المعتمد؟</label>
               <div class="radio-pill-group">
@@ -214,6 +262,7 @@
                 </label>
               </div>
             </div>
+
             <div class="form-group">
               <label for="loanExtraNotes" class="field-label">ملاحظات أخرى حول الإعارة:</label>
               <input type="text" id="loanExtraNotes" class="form-control" placeholder="ملاحظات إضافية...">
@@ -221,6 +270,8 @@
           </div>
         </div>
       </section>
+
+      <!-- 4. المهام -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">🎯</div>
@@ -229,15 +280,19 @@
             <p>توثيق سير الأعمال والمهام المكلف بها</p>
           </div>
         </div>
+
         <div class="form-group">
           <label for="tasksCompleted" class="field-label success-text">🌾 مهام أُنجزت خلال الفترة:</label>
           <textarea id="tasksCompleted" class="form-control form-textarea" rows="2" placeholder="اكتب ما تم إنجازه في المداومة..."></textarea>
         </div>
+
         <div class="form-group">
           <label for="tasksPending" class="field-label warning-text">⌛️ مهام قيد الانتظار أو لم تنجز (مع ذكر السبب):</label>
           <textarea id="tasksPending" class="form-control form-textarea" rows="2" placeholder="اكتب المهام المؤجلة أو التي تعذر إنجازها وسبب ذلك..."></textarea>
         </div>
       </section>
+
+      <!-- 5. نظافة المقر -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">🫆</div>
@@ -246,6 +301,7 @@
             <p>الحفاظ على رونق ونظافة مقر نادي جسور</p>
           </div>
         </div>
+
         <div class="form-group">
           <div class="radio-pill-group">
             <label class="pill-option pill-success">
@@ -263,12 +319,16 @@
               </span>
             </label>
           </div>
+
+          <!-- خانة التوضيح الشرطية لعدم النظافة -->
           <div class="conditional-box is-hidden" id="cleanlinessReasonBox">
             <label for="cleanlinessDetails" class="field-label warning-text">🧹 وضح حالة المقر وما سبب عدم النظافة بالتفصيل:</label>
             <textarea id="cleanlinessDetails" class="form-control form-textarea" rows="2" placeholder="اذكر النقص في النظافة ومن تسبب فيه أو ما يلزم تنظيفه..."></textarea>
           </div>
         </div>
       </section>
+
+      <!-- 6. احتياجات النادي والملاحظات -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">💡</div>
@@ -277,15 +337,19 @@
             <p>رسائل عاجلة، نقائص، وحوادث استثنائية</p>
           </div>
         </div>
+
         <div class="form-group">
           <label for="urgentNeeds" class="field-label">📢 رسالة عاجلة / احتياجات المقر:</label>
           <input type="text" id="urgentNeeds" class="form-control" placeholder="احتياجات عاجلة أو لوازم تنقص النادي...">
         </div>
+
         <div class="form-group">
           <label for="generalIncidents" class="field-label">⚠️ حوادث أو ملاحظات عامة:</label>
           <textarea id="generalIncidents" class="form-control form-textarea" rows="2" placeholder="أي طارئ أو ملاحظة إدارية عامة..."></textarea>
         </div>
       </section>
+
+      <!-- 7. إجراءات تغيير المداوم (الصباحية فقط) -->
       <section class="card section-card morning-only-section" id="morningHandoverSection">
         <div class="card-header">
           <div class="card-icon-badge">🔄</div>
@@ -294,6 +358,8 @@
             <p>التنسيق وتسليم العهدة للمداوم المسائي</p>
           </div>
         </div>
+
+        <!-- نقل المستجدات -->
         <div class="form-group">
           <label class="field-label">هل تم نقل المستجدات والمهام للمداوم التالي؟</label>
           <div class="radio-pill-group">
@@ -312,12 +378,16 @@
               </span>
             </label>
           </div>
+
           <div class="conditional-box is-hidden" id="updatesTransferredReasonBox">
             <label for="updatesTransferredReason" class="field-label warning-text">❌ لماذا لم يتم نقل المستجدات؟</label>
             <input type="text" id="updatesTransferredReason" class="form-control" placeholder="اذكر السبب...">
           </div>
         </div>
+
         <div class="divider-line"></div>
+
+        <!-- تسليم المفتاح -->
         <div class="form-group">
           <label class="field-label">هل تم تسليم مفتاح المداومين إلى المداوم التالي؟</label>
           <div class="radio-pill-group">
@@ -336,12 +406,15 @@
               </span>
             </label>
           </div>
+
           <div class="conditional-box is-hidden" id="keyHandedOverReasonBox">
             <label for="keyHandedOverReason" class="field-label warning-text">❌ لماذا لم يُسلم المفتاح وأين تم حفظه؟</label>
             <input type="text" id="keyHandedOverReason" class="form-control" placeholder="سبب عدم التسليم ومكان حفظ المفتاح الحالي...">
           </div>
         </div>
       </section>
+
+      <!-- 7. الغلق (المسائية فقط) -->
       <section class="card section-card evening-only-section is-hidden" id="eveningClosingSection">
         <div class="card-header">
           <div class="card-icon-badge">🔐</div>
@@ -350,28 +423,33 @@
             <p>قائمة التحقق الإلزامية قبل مغادرة المقر</p>
           </div>
         </div>
+
         <div class="checklist-group">
           <label class="custom-checkbox-item">
             <input type="checkbox" id="closeWindow" checked>
             <span class="checkbox-indicator"></span>
             <span class="checkbox-text">🪟 إغلاق النوافذ بإحكام.</span>
           </label>
+
           <label class="custom-checkbox-item">
             <input type="checkbox" id="organizePlace" checked>
             <span class="checkbox-indicator"></span>
             <span class="checkbox-text">🪑 ترتيب المكان وتنظيم الكراسي لليوم القادم.</span>
           </label>
+
           <label class="custom-checkbox-item">
             <input type="checkbox" id="turnOffElectronics" checked>
             <span class="checkbox-indicator"></span>
             <span class="checkbox-text">🔌 إطفاء الأنوار وفصل الأجهزة الكهربائية والمشتركات.</span>
           </label>
+
           <label class="custom-checkbox-item">
             <input type="checkbox" id="lockDoor" checked>
             <span class="checkbox-indicator"></span>
             <span class="checkbox-text">🗝️ غلق الباب الرئيسي بالمفتاح بإحكام.</span>
           </label>
         </div>
+
         <div class="form-group mt-3">
           <label for="keyReturnLocationSelect" class="field-label required-label">🔑 إرجاع نسخة المفتاح الخاصة بالمداومين (أين تم وضعها؟):</label>
           <select id="keyReturnLocationSelect" class="form-control">
@@ -380,11 +458,14 @@
             <option value="أودع في مكان الحفظ المتفق عليه بالنادي">أودع في مكان الحفظ المتفق عليه بالنادي</option>
             <option value="مكان آخر (حدد بالتفصيل)">مكان آخر (حدد بالتفصيل)</option>
           </select>
+          
           <div class="conditional-box is-hidden mt-2" id="customKeyLocationBox">
             <input type="text" id="customKeyLocation" class="form-control" placeholder="حدد أين تم حفظ المفتاح بالتحديد...">
           </div>
         </div>
       </section>
+
+      <!-- 8. استخدام الطابعة -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">🖨️</div>
@@ -393,6 +474,7 @@
             <p>توثيق استهلاك الورق والحبر</p>
           </div>
         </div>
+
         <div class="form-group">
           <div class="radio-pill-group">
             <label class="pill-option pill-muted">
@@ -410,6 +492,8 @@
               </span>
             </label>
           </div>
+
+          <!-- تفاصيل استخدام الطابعة الشرطية -->
           <div class="conditional-box is-hidden" id="printerDetailsBox">
             <div class="sub-form-grid">
               <div class="form-group">
@@ -424,6 +508,8 @@
           </div>
         </div>
       </section>
+
+      <!-- 9. توصيات للمداوم التالي -->
       <section class="card section-card">
         <div class="card-header">
           <div class="card-icon-badge">🎙️</div>
@@ -432,10 +518,13 @@
             <p>رسالة وتوجيهات للزميل المستلم في الفترة القادمة</p>
           </div>
         </div>
+
         <div class="form-group">
           <textarea id="nextDutyRecommendations" class="form-control form-textarea" rows="2" placeholder="اكتب أي وصية أو تذكير خاص بالعهدة أو المهام للمداوم التالي..."></textarea>
         </div>
       </section>
+
+      <!-- أزرار الإجراءات السفلية الثابتة -->
       <div class="action-footer">
         <button type="button" class="btn btn-secondary" id="btnPreview">
           <span class="btn-icon">👁️</span>
@@ -446,8 +535,11 @@
           <span>اعتماد وإرسال التقرير</span>
         </button>
       </div>
+
     </form>
   </div>
+
+  <!-- نافذة المعاينة المنبثقة (Modal) -->
   <div class="modal-backdrop is-hidden" id="previewModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -470,7 +562,10 @@
       </div>
     </div>
   </div>
+
+  <!-- حاوية التنبيهات السريعة (Toasts) -->
   <div class="toast-container" id="toastContainer"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
