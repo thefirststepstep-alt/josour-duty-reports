@@ -24,6 +24,9 @@
     measurementId: "G-B1VH7QBJHP"
   };
 
+  // رابط تطبيق الويب الخاص بـ Google Sheets (Apps Script Webhook)
+  let GOOGLE_SHEETS_WEBHOOK_URL = "";
+
   let db = null;
   try {
     if (typeof firebase !== 'undefined') {
@@ -125,38 +128,7 @@
     setupShiftTabs();
     setupConditionalLogic();
     setupEventHandlers();
-    setupLogoChangeHandler();
     autoFillUserData();
-  }
-
-  function setupLogoChangeHandler() {
-    const logoInput = document.getElementById('logoFileInput');
-    const clubAppLogo = document.getElementById('clubAppLogo');
-    
-    try {
-      const savedLogo = localStorage.getItem('josour_custom_logo');
-      if (savedLogo && clubAppLogo) {
-        clubAppLogo.src = savedLogo;
-      }
-    } catch (e) {}
-
-    if (logoInput && clubAppLogo) {
-      logoInput.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (evt) {
-            const newLogoData = evt.target.result;
-            clubAppLogo.src = newLogoData;
-            try {
-              localStorage.setItem('josour_custom_logo', newLogoData);
-            } catch (err) {}
-            showToast('🏛️ تم تحديث وحفظ شعار النادي بنجاح!');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
   }
 
   function setupDateTime() {
@@ -546,6 +518,7 @@
       formattedReport: formattedText
     };
 
+    // 1. الحفظ الفوري في قاعدة بيانات Firebase Cloud Firestore السحابية
     if (db) {
       try {
         await db.collection("duty_reports").add({
@@ -560,6 +533,25 @@
       }
     }
 
+    // 2. المزامنة التلقائية مع جداول بيانات Google Sheets
+    if (GOOGLE_SHEETS_WEBHOOK_URL) {
+      try {
+        fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(() => {
+          console.log("Duty report synced to Google Sheets ✅");
+        }).catch(err => {
+          console.warn("Google Sheets sync notice:", err);
+        });
+      } catch (sheetsErr) {
+        console.warn("Google Sheets fetch error:", sheetsErr);
+      }
+    }
+
+    // 3. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
     if (tg && tg.sendData) {
       try {
         tg.sendData(JSON.stringify(payload));
@@ -570,6 +562,7 @@
       }
     }
 
+    // 4. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
     elements.reportPreviewText.textContent = formattedText;
     elements.previewModal.classList.remove('is-hidden');
     showToast('✨ تم تجهيز واعتماد التقرير بنجاح!');
