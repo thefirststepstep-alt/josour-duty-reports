@@ -125,7 +125,38 @@
     setupShiftTabs();
     setupConditionalLogic();
     setupEventHandlers();
+    setupLogoChangeHandler();
     autoFillUserData();
+  }
+
+  function setupLogoChangeHandler() {
+    const logoInput = document.getElementById('logoFileInput');
+    const clubAppLogo = document.getElementById('clubAppLogo');
+    
+    try {
+      const savedLogo = localStorage.getItem('josour_custom_logo');
+      if (savedLogo && clubAppLogo) {
+        clubAppLogo.src = savedLogo;
+      }
+    } catch (e) {}
+
+    if (logoInput && clubAppLogo) {
+      logoInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            const newLogoData = evt.target.result;
+            clubAppLogo.src = newLogoData;
+            try {
+              localStorage.setItem('josour_custom_logo', newLogoData);
+            } catch (err) {}
+            showToast('🏛️ تم تحديث وحفظ شعار النادي بنجاح!');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
   }
 
   function setupDateTime() {
