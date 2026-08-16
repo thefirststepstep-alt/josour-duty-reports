@@ -25,7 +25,7 @@
   };
 
   // رابط تطبيق الويب الخاص بـ Google Sheets (Apps Script Webhook)
-  let GOOGLE_SHEETS_WEBHOOK_URL = "";
+  const GOOGLE_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKhFCBKkYXlMw5N71jkN11B74xiSnvOarQppc2iEkkWitUu17oVrX69EaxJGH2-_sv/exec";
 
   let db = null;
   try {
