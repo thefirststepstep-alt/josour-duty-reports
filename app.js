@@ -47,15 +47,18 @@
 
   // عناصر واجهة المستخدم
   const elements = {
+    // التبويبات
     tabMorning: document.getElementById('tabMorning'),
     tabEvening: document.getElementById('tabEvening'),
     morningHandoverSection: document.getElementById('morningHandoverSection'),
     eveningClosingSection: document.getElementById('eveningClosingSection'),
 
+    // معلومات التاريخ
     displayDate: document.getElementById('displayDate'),
     displayDay: document.getElementById('displayDay'),
     displayWeek: document.getElementById('displayWeek'),
 
+    // حقول المداومين
     primaryMember: document.getElementById('primaryMember'),
     primaryTimeFrom: document.getElementById('primaryTimeFrom'),
     primaryTimeTo: document.getElementById('primaryTimeTo'),
@@ -63,9 +66,11 @@
     assistantTimeFrom: document.getElementById('assistantTimeFrom'),
     assistantTimeTo: document.getElementById('assistantTimeTo'),
 
+    // 1. الجاهزية والعتاد
     equipmentStatusRadios: document.getElementsByName('equipmentStatus'),
     equipmentDefectBox: document.getElementById('equipmentDefectBox'),
     equipmentDefectDetails: document.getElementById('equipmentDefectDetails'),
+    defectSheetLoggedConfirm: document.getElementById('defectSheetLoggedConfirm'),
 
     chargingStatusRadios: document.getElementsByName('chargingStatus'),
     chargingDetailsBox: document.getElementById('chargingDetailsBox'),
@@ -73,8 +78,10 @@
     chargingReasonBox: document.getElementById('chargingReasonBox'),
     chargingNotChargedReason: document.getElementById('chargingNotChargedReason'),
 
+    // 2. الاستقبال
     receptionNotes: document.getElementById('receptionNotes'),
 
+    // 3. الإعارة والاسترجاع
     toggleLoanActivity: document.getElementById('toggleLoanActivity'),
     loanDetailsBox: document.getElementById('loanDetailsBox'),
     loanBorrowedItem: document.getElementById('loanBorrowedItem'),
@@ -82,16 +89,20 @@
     loanProtocolRadios: document.getElementsByName('loanProtocolFollowed'),
     loanExtraNotes: document.getElementById('loanExtraNotes'),
 
+    // 4. المهام
     tasksCompleted: document.getElementById('tasksCompleted'),
     tasksPending: document.getElementById('tasksPending'),
 
+    // 5. النظافة
     cleanlinessStatusRadios: document.getElementsByName('cleanlinessStatus'),
     cleanlinessReasonBox: document.getElementById('cleanlinessReasonBox'),
     cleanlinessDetails: document.getElementById('cleanlinessDetails'),
 
+    // 6. الاحتياجات
     urgentNeeds: document.getElementById('urgentNeeds'),
     generalIncidents: document.getElementById('generalIncidents'),
 
+    // 7. الصباحي
     updatesTransferredRadios: document.getElementsByName('updatesTransferred'),
     updatesTransferredReasonBox: document.getElementById('updatesTransferredReasonBox'),
     updatesTransferredReason: document.getElementById('updatesTransferredReason'),
@@ -100,6 +111,7 @@
     keyHandedOverReasonBox: document.getElementById('keyHandedOverReasonBox'),
     keyHandedOverReason: document.getElementById('keyHandedOverReason'),
 
+    // 7. المسائي
     closeWindow: document.getElementById('closeWindow'),
     organizePlace: document.getElementById('organizePlace'),
     turnOffElectronics: document.getElementById('turnOffElectronics'),
@@ -108,13 +120,16 @@
     customKeyLocationBox: document.getElementById('customKeyLocationBox'),
     customKeyLocation: document.getElementById('customKeyLocation'),
 
+    // 8. الطابعة
     printerUsageRadios: document.getElementsByName('printerUsage'),
     printerDetailsBox: document.getElementById('printerDetailsBox'),
     printerPageCount: document.getElementById('printerPageCount'),
     printerPurpose: document.getElementById('printerPurpose'),
 
+    // 9. التوصيات
     nextDutyRecommendations: document.getElementById('nextDutyRecommendations'),
 
+    // الأزرار والتحكم
     form: document.getElementById('dutyReportForm'),
     btnPreview: document.getElementById('btnPreview'),
     previewModal: document.getElementById('previewModal'),
@@ -128,6 +143,7 @@
 
   let currentShift = 'morning';
 
+  // تهيئة التطبيق عند التحميل
   function init() {
     setupDateTime();
     setupShiftTabs();
@@ -136,6 +152,7 @@
     autoFillUserData();
   }
 
+  // ضبط التاريخ واليوم والأسبوع
   function setupDateTime() {
     const now = new Date();
     const daysArabic = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -152,6 +169,7 @@
     elements.displayDay.textContent = currentDay;
     elements.displayWeek.textContent = weekNum;
 
+    // ضبط التبويب الافتراضي حسب الساعة الحالية (بعد 13:00 مساءً يصبح مسائياً تلقائياً)
     if (now.getHours() >= 13) {
       setShift('evening');
     } else {
@@ -159,6 +177,7 @@
     }
   }
 
+  // محاولة استخراج اسم المستخدم من تيليجرام
   function autoFillUserData() {
     if (tg?.initDataUnsafe?.user) {
       const user = tg.initDataUnsafe.user;
@@ -169,6 +188,7 @@
     }
   }
 
+  // إدارة التبديل بين الصباحي والمسائي
   function setupShiftTabs() {
     elements.tabMorning.addEventListener('click', () => setShift('morning'));
     elements.tabEvening.addEventListener('click', () => setShift('evening'));
@@ -197,7 +217,9 @@
     }
   }
 
+  // إعداد المنطق الشرطي التفاعلي (الحقول الذكية)
   function setupConditionalLogic() {
+    // 1. العتاد (إذا وجد نقص/خلل يظهر حقل التوضيح)
     Array.from(elements.equipmentStatusRadios).forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'خلل_أو_نقص') {
@@ -206,10 +228,14 @@
         } else {
           elements.equipmentDefectBox.classList.add('is-hidden');
           elements.equipmentDefectDetails.value = '';
+          if (elements.defectSheetLoggedConfirm) {
+            elements.defectSheetLoggedConfirm.checked = false;
+          }
         }
       });
     });
 
+    // 2. الشحن (إذا لم يتم الشحن يظهر حقل السبب)
     Array.from(elements.chargingStatusRadios).forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'لم_يتم_الشحن') {
@@ -224,6 +250,7 @@
       });
     });
 
+    // 3. الإعارة والاسترجاع
     elements.toggleLoanActivity.addEventListener('change', (e) => {
       if (e.target.checked) {
         elements.loanDetailsBox.classList.remove('is-hidden');
@@ -235,6 +262,7 @@
       }
     });
 
+    // 4. النظافة (إذا غير نظيف يظهر حقل التوضيح)
     Array.from(elements.cleanlinessStatusRadios).forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'غير_نظيف') {
@@ -247,6 +275,7 @@
       });
     });
 
+    // 5. الصباحي: نقل المستجدات
     Array.from(elements.updatesTransferredRadios).forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'لا') {
@@ -259,6 +288,7 @@
       });
     });
 
+    // 6. الصباحي: تسليم المفتاح
     Array.from(elements.keyHandedOverRadios).forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'لا') {
@@ -271,6 +301,7 @@
       });
     });
 
+    // 7. المسائي: مكان المفتاح المخصص
     elements.keyReturnLocationSelect.addEventListener('change', (e) => {
       if (e.target.value.includes('مكان آخر')) {
         elements.customKeyLocationBox.classList.remove('is-hidden');
@@ -281,6 +312,7 @@
       }
     });
 
+    // 8. الطابعة
     Array.from(elements.printerUsageRadios).forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'استخدمتها') {
@@ -295,6 +327,7 @@
     });
   }
 
+  // جمع كافة البيانات من الحقول
   function collectFormData() {
     const selectedEquipment = document.querySelector('input[name="equipmentStatus"]:checked')?.value || 'سليم';
     const selectedCharging = document.querySelector('input[name="chargingStatus"]:checked')?.value || 'تم_الشحن';
@@ -312,32 +345,41 @@
       assistantMember: elements.assistantMember.value.trim() || 'لا يوجد',
       assistantTime: elements.assistantMember.value.trim() ? `من ${elements.assistantTimeFrom.value} إلى ${elements.assistantTimeTo.value}` : '---',
       
+      // 1. الجاهزية
       equipmentStatus: selectedEquipment === 'سليم' ? 'سليم' : `يوجد خلل أو نقص: ${elements.equipmentDefectDetails.value.trim() || 'لم يُحدد'}`,
+      defectLoggedConfirmed: selectedEquipment === 'خلل_أو_نقص' ? elements.defectSheetLoggedConfirm?.checked : false,
       chargingStatus: selectedCharging === 'تم_الشحن' 
         ? `تم شحن: ${elements.chargingChargedItems.value.trim() || 'جميع الأجهزة اللازمة'}` 
         : `لم يتم الشحن بسبب: ${elements.chargingNotChargedReason.value.trim() || 'غير محدد'}`,
       
+      // 2. الاستقبال
       receptionNotes: elements.receptionNotes.value.trim() || 'لا توجد ملاحظات خاصة بالاستقبال',
 
+      // 3. الإعارة
       hasLoan: elements.toggleLoanActivity.checked,
       loanBorrowed: elements.loanBorrowedItem.value.trim(),
       loanReturned: elements.loanReturnedItem.value.trim(),
       loanProtocol: document.querySelector('input[name="loanProtocolFollowed"]:checked')?.value || 'نعم',
       loanExtraNotes: elements.loanExtraNotes.value.trim(),
 
+      // 4. المهام
       tasksCompleted: elements.tasksCompleted.value.trim() || 'متابعة فتح واستقبال المقر والمهام الروتينية',
       tasksPending: elements.tasksPending.value.trim() || 'لا توجد مهام معلقة',
 
+      // 5. النظافة
       cleanliness: selectedCleanliness === 'نظيف' ? 'نظيف ومثالي ✨' : `غير نظيف (الملاحظة: ${elements.cleanlinessDetails.value.trim() || 'غير محددة'})`,
 
+      // 6. الاحتياجات
       urgentNeeds: elements.urgentNeeds.value.trim() || 'لا توجد متطلبات عاجلة',
       generalIncidents: elements.generalIncidents.value.trim() || 'سير المداومة عادي بدون حوادث',
 
+      // 7. الصباحي
       morningUpdates: document.querySelector('input[name="updatesTransferred"]:checked')?.value || 'نعم',
       morningUpdatesReason: elements.updatesTransferredReason.value.trim(),
       morningKeyHandover: document.querySelector('input[name="keyHandedOver"]:checked')?.value || 'نعم',
       morningKeyReason: elements.keyHandedOverReason.value.trim(),
 
+      // 7. المسائي
       eveningChecklist: {
         window: elements.closeWindow.checked,
         organize: elements.organizePlace.checked,
@@ -348,16 +390,19 @@
         ? `مكان آخر: ${elements.customKeyLocation.value.trim() || 'غير محدد'}` 
         : elements.keyReturnLocationSelect.value,
 
+      // 8. الطابعة
       printerUsage: selectedPrinter,
       printerPageCount: elements.printerPageCount.value.trim(),
       printerPurpose: elements.printerPurpose.value.trim(),
 
+      // 9. التوصيات
       recommendations: elements.nextDutyRecommendations.value.trim() || 'بالتوفيق للمداوم التالي 🌿'
     };
 
     return data;
   }
 
+  // محرك صياغة نص التقرير المطابق لوثيقة النادي الرسمية
   function generateFormattedReport(data) {
     const isMorning = data.shift === 'morning';
     const title = isMorning 
@@ -376,7 +421,12 @@
     }
 
     report += `\n1. 🏢 الجاهزية:\n`;
-    report += `• حالة العتاد: [ ${data.equipmentStatus} ]\n`;
+    if (data.defectLoggedConfirmed) {
+      report += `• حالة العتاد: [ ⚠️ ${data.equipmentStatus} ]\n`;
+      report += `• التوثيق في سجل الأعطال: [ ✅ تم التسجيل في سجل الأعطال والفقدان الرسمي ]\n`;
+    } else {
+      report += `• حالة العتاد: [ ${data.equipmentStatus} ]\n`;
+    }
     report += `• الشحن 🔌: [ ${data.chargingStatus} ]\n`;
 
     report += `\n2. 📥 الاستقبال والتوصيات:\n`;
@@ -438,6 +488,7 @@
     return report;
   }
 
+  // التحقق من صحة المدخلات الإلزامية
   function validateForm() {
     if (!elements.primaryMember.value.trim()) {
       showToast('⚠️ يرجى كتابة اسم المداوم الرئيسي');
@@ -446,10 +497,17 @@
     }
 
     const selectedEquipment = document.querySelector('input[name="equipmentStatus"]:checked')?.value;
-    if (selectedEquipment === 'خلل_أو_نقص' && !elements.equipmentDefectDetails.value.trim()) {
-      showToast('⚠️ يرجى توضيح تفاصيل الخلل أو النقص في العتاد');
-      elements.equipmentDefectDetails.focus();
-      return false;
+    if (selectedEquipment === 'خلل_أو_نقص') {
+      if (!elements.equipmentDefectDetails.value.trim()) {
+        showToast('⚠️ يرجى توضيح تفاصيل الخلل أو النقص في العتاد');
+        elements.equipmentDefectDetails.focus();
+        return false;
+      }
+      if (!elements.defectSheetLoggedConfirm.checked) {
+        showToast('⚠️ إلزامي: يجب فتح سجل الأعطال وتسجيل الخلل ثم تفعيل الإقرار قبل إرسال التقرير!');
+        elements.defectSheetLoggedConfirm.focus();
+        return false;
+      }
     }
 
     const selectedCharging = document.querySelector('input[name="chargingStatus"]:checked')?.value;
@@ -476,7 +534,9 @@
     return true;
   }
 
+  // إعداد مستمعات الأحداث
   function setupEventHandlers() {
+    // زر المعاينة
     elements.btnPreview.addEventListener('click', () => {
       if (!validateForm()) return;
       const data = collectFormData();
@@ -485,10 +545,12 @@
       elements.previewModal.classList.remove('is-hidden');
     });
 
+    // إغلاق المعاينة
     elements.btnCloseModal.addEventListener('click', () => {
       elements.previewModal.classList.add('is-hidden');
     });
 
+    // نسخ نص التقرير
     elements.btnCopyText.addEventListener('click', async () => {
       const text = elements.reportPreviewText.textContent;
       try {
@@ -503,6 +565,7 @@
       }
     });
 
+    // تأكيد الإرسال
     elements.btnConfirmSend.addEventListener('click', submitReport);
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -510,6 +573,7 @@
     });
   }
 
+  // إرسال وحفظ التقرير (متعدد المنصات: Firebase + Google Sheets + Telegram)
   async function submitReport() {
     if (!validateForm()) return;
 
@@ -594,6 +658,7 @@
     showToast('✨ تم تجهيز واعتماد التقرير بنجاح!');
   }
 
+  // دالة الإشعارات السريعة (Toasts)
   function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -605,6 +670,7 @@
     }, 3000);
   }
 
+  // الانطلاق عند اكتمال تحميل الصفحة
   document.addEventListener('DOMContentLoaded', init);
 
 })();
