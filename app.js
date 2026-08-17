@@ -27,6 +27,11 @@
   // رابط تطبيق الويب الخاص بـ Google Sheets (Apps Script Webhook)
   const GOOGLE_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKhFCBKkYXlMw5N71jkN11B74xiSnvOarQppc2iEkkWitUu17oVrX69EaxJGH2-_sv/exec";
 
+  // إعدادات النشر المباشر في مجموعة تيليجرام (حقيبة نشطاء جسور ⬅️ موضوع تقارير المداومة)
+  const TELEGRAM_BOT_TOKEN = "8509092860:AAHmuzN7Ro2NSUrcjj9f_2kStXI6gHcozX8";
+  const JOSOUR_GROUP_ID = "-1004497345814";
+  const DUTY_TOPIC_THREAD_ID = 30;
+
   let db = null;
   try {
     if (typeof firebase !== 'undefined') {
@@ -551,18 +556,39 @@
       }
     }
 
-    // 3. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
+    // 3. النشر الفوري المباشر في مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة"
+    try {
+      const tgUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      fetch(tgUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: JOSOUR_GROUP_ID,
+          message_thread_id: DUTY_TOPIC_THREAD_ID,
+          text: formattedText
+        })
+      }).then(res => res.json()).then(resData => {
+        if (resData.ok) {
+          showToast('📢 تم إرسال التقرير فوراً إلى مجموعة حقيبة نشطاء جسور!');
+        }
+      }).catch(tgErr => {
+        console.warn("Direct Telegram post notice:", tgErr);
+      });
+    } catch (err) {
+      console.warn("Direct Telegram broadcast error:", err);
+    }
+
+    // 4. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
     if (tg && tg.sendData) {
       try {
         tg.sendData(JSON.stringify(payload));
-        showToast('🚀 تم إرسال التقرير بنجاح إلى تيليجرام!');
         return;
       } catch (err) {
         console.warn('Telegram sendData failed:', err);
       }
     }
 
-    // 4. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
+    // 5. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
     elements.reportPreviewText.textContent = formattedText;
     elements.previewModal.classList.remove('is-hidden');
     showToast('✨ تم تجهيز واعتماد التقرير بنجاح!');
