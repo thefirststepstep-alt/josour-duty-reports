@@ -163,6 +163,7 @@
     const year = now.getFullYear();
     const formattedDate = `${day} / ${month} / ${year}`;
 
+    // حساب رقم الأسبوع التقريبي من الشهر
     const weekNum = Math.ceil(now.getDate() / 7);
 
     elements.displayDate.textContent = formattedDate;
@@ -557,15 +558,24 @@
         await navigator.clipboard.writeText(text);
         elements.copyBtnLabel.textContent = 'تم النسخ بنجاح! ✅';
         showToast('📋 تم نسخ التقرير المنسق إلى الحافظة');
-        setTimeout(() => {
-          elements.copyBtnLabel.textContent = 'نسخ النص كرسالة';
-        }, 2500);
       } catch (err) {
         showToast('تعذر النسخ التلقائي، يمكنك تحديده ونسخه يدوياً');
       }
     });
 
-    // تأكيد الإرسال
+    // فتح رابط سجل الأعطال مباشرة في المتصفح الخارجي / تطبيق Google Sheets
+    const defectLink = document.querySelector('.btn-sheet-link');
+    if (defectLink) {
+      defectLink.addEventListener('click', (e) => {
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/1DmuSOLyNDck0aeBtkapptSn2KdqyVzpiS2DOI6VKFBE/edit?gid=0#gid=0";
+        if (tg && tg.openLink) {
+          e.preventDefault();
+          tg.openLink(sheetUrl);
+        }
+      });
+    }
+
+    // زر الإرسال من النافذة أو النموذج
     elements.btnConfirmSend.addEventListener('click', submitReport);
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
