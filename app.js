@@ -24,13 +24,8 @@
     measurementId: "G-B1VH7QBJHP"
   };
 
-  // رابط تطبيق الويب الخاص بـ Google Sheets (Apps Script Webhook)
+  // رابط تطبيق الويب الخاص بـ Google Sheets (Apps Script Webhook - يتولى الأرشفة والنشر الآمن في تيليجرام)
   const GOOGLE_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKhFCBKkYXlMw5N71jkN11B74xiSnvOarQppc2iEkkWitUu17oVrX69EaxJGH2-_sv/exec";
-
-  // إعدادات النشر المباشر في مجموعة تيليجرام (حقيبة نشطاء جسور ⬅️ موضوع تقارير المداومة)
-  const TELEGRAM_BOT_TOKEN = "8509092860:AAHmuzN7Ro2NSUrcjj9f_2kStXI6gHcozX8";
-  const JOSOUR_GROUP_ID = "-1004497345814";
-  const DUTY_TOPIC_THREAD_ID = 30;
 
   let db = null;
   try {
@@ -612,7 +607,7 @@
       }
     }
 
-    // 2. المزامنة التلقائية مع جداول بيانات Google Sheets
+    // 2. المزامنة التلقائية مع جداول بيانات Google Sheets والنشر في تيليجرام عبر الخادم الآمن
     if (GOOGLE_SHEETS_WEBHOOK_URL) {
       try {
         fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
@@ -621,7 +616,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         }).then(() => {
-          console.log("Duty report synced to Google Sheets ✅");
+          showToast('📢 تم إرسال التقرير ومزامنته بنجاح!');
         }).catch(err => {
           console.warn("Google Sheets sync notice:", err);
         });
@@ -630,29 +625,7 @@
       }
     }
 
-    // 3. النشر الفوري المباشر في مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة"
-    try {
-      const tgUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-      fetch(tgUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: JOSOUR_GROUP_ID,
-          message_thread_id: DUTY_TOPIC_THREAD_ID,
-          text: formattedText
-        })
-      }).then(res => res.json()).then(resData => {
-        if (resData.ok) {
-          showToast('📢 تم إرسال التقرير فوراً إلى مجموعة حقيبة نشطاء جسور!');
-        }
-      }).catch(tgErr => {
-        console.warn("Direct Telegram post notice:", tgErr);
-      });
-    } catch (err) {
-      console.warn("Direct Telegram broadcast error:", err);
-    }
-
-    // 4. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
+    // 3. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
     if (tg && tg.sendData) {
       try {
         tg.sendData(JSON.stringify(payload));
@@ -662,7 +635,7 @@
       }
     }
 
-    // 5. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
+    // 4. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
     elements.reportPreviewText.textContent = formattedText;
     elements.previewModal.classList.remove('is-hidden');
     showToast('✨ تم تجهيز واعتماد التقرير بنجاح!');
