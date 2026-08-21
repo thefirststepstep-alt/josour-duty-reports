@@ -607,7 +607,7 @@
       }
     }
 
-    // 2. المزامنة التلقائية مع جداول بيانات Google Sheets والنشر في تيليجرام عبر الخادم الآمن
+    // 2. المزامنة التلقائية مع جداول بيانات Google Sheets
     if (GOOGLE_SHEETS_WEBHOOK_URL) {
       try {
         fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
@@ -616,7 +616,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         }).then(() => {
-          showToast('📢 تم إرسال التقرير ومزامنته بنجاح!');
+          console.log("Duty report synced to Google Sheets ✅");
         }).catch(err => {
           console.warn("Google Sheets sync notice:", err);
         });
@@ -625,7 +625,30 @@
       }
     }
 
-    // 3. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
+    // 3. النشر الفوري المباشر في مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة" (Topic 30)
+    try {
+      const _k = atob("ODUwOTA5Mjg2MDpBQUVUNFdDWHJ4Mk1EMlFWYjB5clJDcWw1bEFYb3ktVWh5WQ==");
+      const tgUrl = `https://api.telegram.org/bot${_k}/sendMessage`;
+      fetch(tgUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: -1004497345814,
+          message_thread_id: 30,
+          text: formattedText
+        })
+      }).then(res => res.json()).then(resData => {
+        if (resData.ok) {
+          showToast('📢 تم إرسال التقرير فوراً إلى حقيبة نشطاء جسور!');
+        }
+      }).catch(tgErr => {
+        console.warn("Direct Telegram post notice:", tgErr);
+      });
+    } catch (err) {
+      console.warn("Direct Telegram broadcast error:", err);
+    }
+
+    // 4. إذا كان التطبيق مفتوحاً داخل تيليجرام WebApp
     if (tg && tg.sendData) {
       try {
         tg.sendData(JSON.stringify(payload));
@@ -635,7 +658,7 @@
       }
     }
 
-    // 4. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
+    // 5. إذا كان يعمل في متصفح عادي: إظهار رسالة نجاح مع خيار النسخ
     elements.reportPreviewText.textContent = formattedText;
     elements.previewModal.classList.remove('is-hidden');
     showToast('✨ تم تجهيز واعتماد التقرير بنجاح!');
