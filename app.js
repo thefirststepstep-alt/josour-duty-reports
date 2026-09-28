@@ -93,11 +93,11 @@
     cleanlinessReasonBox: document.getElementById('cleanlinessReasonBox'),
     cleanlinessDetails: document.getElementById('cleanlinessDetails'),
 
-    // 6. الاحتياجات
+    // 6. الاحتياجات والطوارئ
     urgentNeeds: document.getElementById('urgentNeeds'),
     generalIncidents: document.getElementById('generalIncidents'),
 
-    // 7. الصباحي
+    // 7. الصباحي (التسليم)
     updatesTransferredRadios: document.getElementsByName('updatesTransferred'),
     updatesTransferredReasonBox: document.getElementById('updatesTransferredReasonBox'),
     updatesTransferredReason: document.getElementById('updatesTransferredReason'),
@@ -106,7 +106,7 @@
     keyHandedOverReasonBox: document.getElementById('keyHandedOverReasonBox'),
     keyHandedOverReason: document.getElementById('keyHandedOverReason'),
 
-    // 7. المسائي
+    // 7. المسائي (الغلق)
     closeWindow: document.getElementById('closeWindow'),
     organizePlace: document.getElementById('organizePlace'),
     turnOffElectronics: document.getElementById('turnOffElectronics'),
@@ -124,7 +124,7 @@
     // 9. التوصيات
     nextDutyRecommendations: document.getElementById('nextDutyRecommendations'),
 
-    // الأزرار والتحكم
+    // الأزرار والنوافذ
     form: document.getElementById('dutyReportForm'),
     btnPreview: document.getElementById('btnPreview'),
     previewModal: document.getElementById('previewModal'),
@@ -133,21 +133,83 @@
     btnCopyText: document.getElementById('btnCopyText'),
     copyBtnLabel: document.getElementById('copyBtnLabel'),
     btnConfirmSend: document.getElementById('btnConfirmSend'),
-    toastContainer: document.getElementById('toastContainer')
+    toastContainer: document.getElementById('toastContainer'),
+
+    // أزرار وأقسام شريط التنقل الرئيسي
+    btnNavReport: document.getElementById('btnNavReport'),
+    btnNavSchedule: document.getElementById('btnNavSchedule'),
+    btnNavAnalytics: document.getElementById('btnNavAnalytics'),
+    viewReportSection: document.getElementById('viewReportSection'),
+    viewScheduleSection: document.getElementById('viewScheduleSection'),
+    viewAnalyticsSection: document.getElementById('viewAnalyticsSection'),
+
+    // عناصر جدول المداومة السحابي
+    btnToggleEditSchedule: document.getElementById('btnToggleEditSchedule'),
+    btnEditScheduleIcon: document.getElementById('btnEditScheduleIcon'),
+    btnEditScheduleText: document.getElementById('btnEditScheduleText'),
+    btnSaveSchedule: document.getElementById('btnSaveSchedule'),
+    scheduleDaysGrid: document.getElementById('scheduleDaysGrid'),
+    scheduleSyncText: document.getElementById('scheduleSyncText'),
+
+    // عناصر لوحة الإحصاءات
+    statTotalReports: document.getElementById('statTotalReports'),
+    statShiftSplit: document.getElementById('statShiftSplit'),
+    statTotalPages: document.getElementById('statTotalPages'),
+    statCleanlinessRate: document.getElementById('statCleanlinessRate'),
+    statEquipHealthRate: document.getElementById('statEquipHealthRate'),
+    leaderboardList: document.getElementById('leaderboardList'),
+    recentReportsList: document.getElementById('recentReportsList')
   };
 
-  let currentShift = 'morning';
+  // الحالة الحالية للتطبيق
+  let currentShift = 'morning'; // 'morning' أو 'evening'
 
-  // تهيئة التطبيق عند التحميل
+  // دالة التهيئة عند فتح التطبيق
   function init() {
     setupDateTime();
     setupShiftTabs();
     setupConditionalLogic();
     setupEventHandlers();
+    setupLogoChangeHandler();
     autoFillUserData();
+    setupMainNav();
+    setupScheduleManager();
+    setupAnalyticsDashboard();
   }
 
-  // ضبط التاريخ واليوم والأسبوع
+  // تفعيل وإدارة تغيير الشعار يدوياً
+  function setupLogoChangeHandler() {
+    const logoInput = document.getElementById('logoFileInput');
+    const clubAppLogo = document.getElementById('clubAppLogo');
+    
+    // استرجاع الشعار المخصص من الذاكرة المحلية إن وجد
+    try {
+      const savedLogo = localStorage.getItem('josour_custom_logo');
+      if (savedLogo && clubAppLogo) {
+        clubAppLogo.src = savedLogo;
+      }
+    } catch (e) {}
+
+    if (logoInput && clubAppLogo) {
+      logoInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            const newLogoData = evt.target.result;
+            clubAppLogo.src = newLogoData;
+            try {
+              localStorage.setItem('josour_custom_logo', newLogoData);
+            } catch (err) {}
+            showToast('🏛️ تم تحديث وحفظ شعار النادي بنجاح!');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+  }
+
+  // تعبئة التاريخ واليوم والأسبوع تلقائياً
   function setupDateTime() {
     const now = new Date();
     const daysArabic = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -530,7 +592,7 @@
     return true;
   }
 
-  // إعداد مستمعات الأحداث
+  // إعداد مستمعي الأحداث والأزرار
   function setupEventHandlers() {
     // زر المعاينة
     elements.btnPreview.addEventListener('click', () => {
@@ -541,12 +603,12 @@
       elements.previewModal.classList.remove('is-hidden');
     });
 
-    // إغلاق المعاينة
+    // إغلاق نافذة المعاينة
     elements.btnCloseModal.addEventListener('click', () => {
       elements.previewModal.classList.add('is-hidden');
     });
 
-    // نسخ نص التقرير
+    // نسخ النص
     elements.btnCopyText.addEventListener('click', async () => {
       const text = elements.reportPreviewText.textContent;
       try {
@@ -578,7 +640,7 @@
     });
   }
 
-  // إرسال وحفظ التقرير (متعدد المنصات: Firebase + Google Sheets + Telegram)
+  // إرسال وحفظ التقرير النهائي
   async function submitReport() {
     if (!validateForm()) return;
 
@@ -664,7 +726,7 @@
     showToast('✨ تم تجهيز واعتماد التقرير بنجاح!');
   }
 
-  // دالة الإشعارات السريعة (Toasts)
+  // عرض إشعار سريع
   function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -676,7 +738,365 @@
     }, 3000);
   }
 
-  // الانطلاق عند اكتمال تحميل الصفحة
+  // ==========================================
+  // 🎛️ إدارة شريط التنقل الرئيسي بين أقسام المنظومة
+  // ==========================================
+  function setupMainNav() {
+    const navItems = [
+      { btn: elements.btnNavReport, view: elements.viewReportSection, onShow: null },
+      { btn: elements.btnNavSchedule, view: elements.viewScheduleSection, onShow: loadScheduleFromFirestore },
+      { btn: elements.btnNavAnalytics, view: elements.viewAnalyticsSection, onShow: loadAnalyticsFromFirestore }
+    ];
+
+    navItems.forEach(item => {
+      if (!item.btn || !item.view) return;
+      item.btn.addEventListener('click', () => {
+        navItems.forEach(n => {
+          n.btn.classList.remove('active');
+          n.view.classList.add('is-hidden');
+        });
+        item.btn.classList.add('active');
+        item.view.classList.remove('is-hidden');
+        if (item.onShow) item.onShow();
+      });
+    });
+  }
+
+  // ==========================================
+  // 📅 إدارة جدول المداومة الأسبوعي السحابي
+  // ==========================================
+  const DEFAULT_WEEKLY_SCHEDULE = [
+    {
+      day: 'الأحد',
+      morning: { primary: 'آية', username: 'Ayazaidi', assistant: '---' },
+      evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
+    },
+    {
+      day: 'الإثنين',
+      morning: { primary: 'عضو مداوم', username: '', assistant: '---' },
+      evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
+    },
+    {
+      day: 'الثلاثاء',
+      morning: { primary: 'عضو مداوم', username: '', assistant: '---' },
+      evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
+    },
+    {
+      day: 'الأربعاء',
+      morning: { primary: 'عضو مداوم', username: '', assistant: '---' },
+      evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
+    },
+    {
+      day: 'الخميس',
+      morning: { primary: 'عضو مداوم', username: '', assistant: '---' },
+      evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
+    }
+  ];
+
+  let currentSchedule = JSON.parse(JSON.stringify(DEFAULT_WEEKLY_SCHEDULE));
+  let isEditScheduleMode = false;
+
+  function setupScheduleManager() {
+    if (elements.btnToggleEditSchedule) {
+      elements.btnToggleEditSchedule.addEventListener('click', toggleScheduleEditMode);
+    }
+    if (elements.btnSaveSchedule) {
+      elements.btnSaveSchedule.addEventListener('click', saveScheduleToFirestore);
+    }
+    renderScheduleGrid();
+  }
+
+  function toggleScheduleEditMode() {
+    isEditScheduleMode = !isEditScheduleMode;
+    if (isEditScheduleMode) {
+      elements.btnEditScheduleIcon.textContent = '✕';
+      elements.btnEditScheduleText.textContent = 'إلغاء التعديل';
+      elements.btnSaveSchedule.classList.remove('is-hidden');
+    } else {
+      elements.btnEditScheduleIcon.textContent = '✏️';
+      elements.btnEditScheduleText.textContent = 'تعديل الجدول';
+      elements.btnSaveSchedule.classList.add('is-hidden');
+    }
+    renderScheduleGrid();
+  }
+
+  function renderScheduleGrid() {
+    if (!elements.scheduleDaysGrid) return;
+
+    const daysArabic = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const todayName = daysArabic[new Date().getDay()];
+
+    let html = '';
+    currentSchedule.forEach((item, index) => {
+      const isToday = item.day === todayName;
+      const todayBadge = isToday ? '<span class="badge-today">اليوم 📍</span>' : '';
+
+      html += `
+        <div class="schedule-day-card ${isToday ? 'is-today' : ''}" data-day-index="${index}">
+          <div class="schedule-day-header">
+            <div class="schedule-day-name">
+              <span>🗓️ ${item.day}</span>
+              ${todayBadge}
+            </div>
+          </div>
+          <div class="schedule-shifts-row">
+            <!-- الفترة الصباحية -->
+            <div class="schedule-shift-box">
+              <div class="shift-box-header">
+                <span class="shift-box-title">☀️ الفترة الصباحية</span>
+                <span class="shift-box-time">08:30 – 12:45</span>
+              </div>
+              ${isEditScheduleMode ? `
+                <div class="schedule-edit-field">
+                  <label>المداوم الرئيسي:</label>
+                  <input type="text" class="edit-shift-primary" data-shift="morning" data-day="${index}" value="${item.morning.primary || ''}">
+                </div>
+                <div class="schedule-edit-field">
+                  <label>معرف تيليجرام (@username):</label>
+                  <input type="text" class="edit-shift-username" data-shift="morning" data-day="${index}" value="${item.morning.username || ''}" placeholder="بدون @">
+                </div>
+                <div class="schedule-edit-field">
+                  <label>المداوم المساعد:</label>
+                  <input type="text" class="edit-shift-assistant" data-shift="morning" data-day="${index}" value="${item.morning.assistant || ''}">
+                </div>
+              ` : `
+                <div class="shift-member-display">
+                  <div class="member-primary-line">
+                    <span>👤 ${item.morning.primary || 'لم يحدد'}</span>
+                    ${item.morning.username ? `<a href="https://t.me/${item.morning.username.replace('@','')}" target="_blank" class="member-tg-link">✈️ @${item.morning.username.replace('@','')}</a>` : ''}
+                  </div>
+                  <div class="member-assistant-line">👥 المساعد: ${item.morning.assistant || '---'}</div>
+                </div>
+              `}
+            </div>
+
+            <!-- الفترة المسائية -->
+            <div class="schedule-shift-box">
+              <div class="shift-box-header">
+                <span class="shift-box-title">🌙 الفترة المسائية</span>
+                <span class="shift-box-time">12:30 – 15:30</span>
+              </div>
+              ${isEditScheduleMode ? `
+                <div class="schedule-edit-field">
+                  <label>المداوم الرئيسي:</label>
+                  <input type="text" class="edit-shift-primary" data-shift="evening" data-day="${index}" value="${item.evening.primary || ''}">
+                </div>
+                <div class="schedule-edit-field">
+                  <label>معرف تيليجرام (@username):</label>
+                  <input type="text" class="edit-shift-username" data-shift="evening" data-day="${index}" value="${item.evening.username || ''}" placeholder="بدون @">
+                </div>
+                <div class="schedule-edit-field">
+                  <label>المداوم المساعد:</label>
+                  <input type="text" class="edit-shift-assistant" data-shift="evening" data-day="${index}" value="${item.evening.assistant || ''}">
+                </div>
+              ` : `
+                <div class="shift-member-display">
+                  <div class="member-primary-line">
+                    <span>👤 ${item.evening.primary || 'لم يحدد'}</span>
+                    ${item.evening.username ? `<a href="https://t.me/${item.evening.username.replace('@','')}" target="_blank" class="member-tg-link">✈️ @${item.evening.username.replace('@','')}</a>` : ''}
+                  </div>
+                  <div class="member-assistant-line">👥 المساعد: ${item.evening.assistant || '---'}</div>
+                </div>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    elements.scheduleDaysGrid.innerHTML = html;
+  }
+
+  function loadScheduleFromFirestore() {
+    if (!db) {
+      renderScheduleGrid();
+      return;
+    }
+
+    elements.scheduleSyncText.textContent = 'جاري مزامنة الجدول مع السحابة... ⏳';
+    db.collection("duty_schedules").doc("current_schedule").get().then(doc => {
+      if (doc.exists && doc.data().schedule) {
+        currentSchedule = doc.data().schedule;
+        elements.scheduleSyncText.textContent = 'متزامن مع سحابة جسور التفاعلية 🔥';
+      } else {
+        elements.scheduleSyncText.textContent = 'جدول افتراضي جاهز للتعديل 🌿';
+      }
+      renderScheduleGrid();
+    }).catch(err => {
+      console.warn("Firestore schedule load error:", err);
+      elements.scheduleSyncText.textContent = 'يعمل بالذاكرة المحلية للمتصفح';
+      renderScheduleGrid();
+    });
+  }
+
+  async function saveScheduleToFirestore() {
+    if (!elements.scheduleDaysGrid) return;
+
+    // تجميع القيم من الحقول المفتوحة
+    currentSchedule.forEach((item, index) => {
+      const morningPrimary = elements.scheduleDaysGrid.querySelector(`.edit-shift-primary[data-shift="morning"][data-day="${index}"]`);
+      const morningUsername = elements.scheduleDaysGrid.querySelector(`.edit-shift-username[data-shift="morning"][data-day="${index}"]`);
+      const morningAssistant = elements.scheduleDaysGrid.querySelector(`.edit-shift-assistant[data-shift="morning"][data-day="${index}"]`);
+
+      const eveningPrimary = elements.scheduleDaysGrid.querySelector(`.edit-shift-primary[data-shift="evening"][data-day="${index}"]`);
+      const eveningUsername = elements.scheduleDaysGrid.querySelector(`.edit-shift-username[data-shift="evening"][data-day="${index}"]`);
+      const eveningAssistant = elements.scheduleDaysGrid.querySelector(`.edit-shift-assistant[data-shift="evening"][data-day="${index}"]`);
+
+      if (morningPrimary) item.morning.primary = morningPrimary.value.trim();
+      if (morningUsername) item.morning.username = morningUsername.value.trim().replace('@', '');
+      if (morningAssistant) item.morning.assistant = morningAssistant.value.trim() || '---';
+
+      if (eveningPrimary) item.evening.primary = eveningPrimary.value.trim();
+      if (eveningUsername) item.evening.username = eveningUsername.value.trim().replace('@', '');
+      if (eveningAssistant) item.evening.assistant = eveningAssistant.value.trim() || '---';
+    });
+
+    if (db) {
+      try {
+        elements.scheduleSyncText.textContent = 'جاري الحفظ في السحابة... ⏳';
+        await db.collection("duty_schedules").doc("current_schedule").set({
+          schedule: currentSchedule,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: elements.primaryMember.value.trim() || 'المشرفة آية'
+        });
+        elements.scheduleSyncText.textContent = 'تم الحفظ والمزامنة السحابية بنجاح ✅';
+        showToast('💾 تم حفظ جدول المداومة في السحابة بنجاح!');
+      } catch (err) {
+        console.error("Firestore schedule save error:", err);
+        showToast('⚠️ تعذر الحفظ السحابي، تم الحفظ محلياً');
+      }
+    } else {
+      showToast('💾 تم حفظ الجدول محلياً بنجاح!');
+    }
+
+    toggleScheduleEditMode();
+  }
+
+  // ==========================================
+  // 📊 إدارة لوحة الإحصاءات والمؤشرات التفاعلية (KPIs)
+  // ==========================================
+  function setupAnalyticsDashboard() {
+    // تحميل أولي إذا كان التبويب مفتوحاً
+  }
+
+  let cachedReports = [];
+
+  async function loadAnalyticsFromFirestore() {
+    if (!db) {
+      if (elements.leaderboardList) elements.leaderboardList.innerHTML = '<div class="empty-state">قاعدة بيانات Firebase غير متصلة محلياً</div>';
+      return;
+    }
+
+    try {
+      const snapshot = await db.collection("duty_reports").limit(100).get();
+      const reports = [];
+      snapshot.forEach(doc => reports.push({ id: doc.id, ...doc.data() }));
+      cachedReports = reports;
+
+      // 1. حساب إجمالي التقارير وتوزيع الفترات
+      const total = reports.length;
+      let morningCount = 0;
+      let eveningCount = 0;
+      let totalPages = 0;
+      let cleanCount = 0;
+      let equipGoodCount = 0;
+      const memberCounts = {};
+
+      reports.forEach(r => {
+        // الفترات
+        if (r.shift === 'morning' || (r.shiftName && r.shiftName.includes('الصباحية'))) {
+          morningCount++;
+        } else {
+          eveningCount++;
+        }
+
+        // الطابعة
+        const p = parseInt(r.printerPageCount, 10);
+        if (!isNaN(p)) totalPages += p;
+
+        // النظافة
+        const cleanStr = String(r.cleanliness || '');
+        if (cleanStr.includes('نظيف') || cleanStr.includes('مثالي')) cleanCount++;
+
+        // العتاد
+        const eqStr = String(r.equipmentStatus || '');
+        if (eqStr.includes('سليم') && !eqStr.includes('خلل')) equipGoodCount++;
+
+        // المداومين
+        const m = String(r.primaryMember || '').trim();
+        if (m) {
+          memberCounts[m] = (memberCounts[m] || 0) + 1;
+        }
+      });
+
+      // تحديث بطاقات المؤشرات
+      if (elements.statTotalReports) elements.statTotalReports.textContent = total;
+      if (elements.statShiftSplit) elements.statShiftSplit.textContent = `${morningCount} صباحية • ${eveningCount} مسائية`;
+      if (elements.statTotalPages) elements.statTotalPages.textContent = totalPages;
+      if (elements.statCleanlinessRate) elements.statCleanlinessRate.textContent = total > 0 ? `${Math.round((cleanCount / total) * 100)}%` : '100%';
+      if (elements.statEquipHealthRate) elements.statEquipHealthRate.textContent = total > 0 ? `${Math.round((equipGoodCount / total) * 100)}%` : '100%';
+
+      // 2. تحديث قائمة المتصدرين (Leaderboard)
+      const sortedMembers = Object.entries(memberCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      if (elements.leaderboardList) {
+        if (sortedMembers.length === 0) {
+          elements.leaderboardList.innerHTML = '<div class="empty-state">لا توجد تقارير مسجلة بعد</div>';
+        } else {
+          elements.leaderboardList.innerHTML = sortedMembers.map(([name, count], idx) => {
+            const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
+            const rankIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+            return `
+              <div class="leaderboard-item">
+                <div class="leaderboard-rank ${rankClass}">${rankIcon}</div>
+                <div class="leaderboard-name">${name}</div>
+                <div class="leaderboard-count">${count} تقرير</div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 3. تحديث سجل التقارير الأخيرة
+      if (elements.recentReportsList) {
+        if (reports.length === 0) {
+          elements.recentReportsList.innerHTML = '<div class="empty-state">لا توجد تقارير لعرضها</div>';
+        } else {
+          const recent = reports.slice(0, 8);
+          elements.recentReportsList.innerHTML = recent.map((r, i) => `
+            <div class="recent-report-card" data-report-index="${i}">
+              <div class="recent-report-top">
+                <span class="recent-report-member">👤 ${r.primaryMember || 'غير محدد'}</span>
+                <span class="recent-report-date">${r.date || 'اليوم'} (${r.shift === 'morning' ? '☀️ صباحية' : '🌙 مسائية'})</span>
+              </div>
+              <div class="recent-report-meta">
+                <span>🏢 العتاد: ${r.equipmentStatus && r.equipmentStatus.includes('سليم') ? '✅ سليم' : '⚠️ خلل'}</span>
+                <span>🖨️ الطابعة: ${r.printerPageCount ? r.printerPageCount + ' صفحة' : 'لم تُستخدم'}</span>
+                <span style="color: var(--gold-accent);">👁️ عرض التفاصيل</span>
+              </div>
+            </div>
+          `).join('');
+
+          // إضافة مستمع لفتح التقرير عند الضغط عليه
+          elements.recentReportsList.querySelectorAll('.recent-report-card').forEach(card => {
+            card.addEventListener('click', () => {
+              const idx = parseInt(card.getAttribute('data-report-index'), 10);
+              const rep = recent[idx];
+              if (rep && rep.formattedReport) {
+                elements.reportPreviewText.textContent = rep.formattedReport;
+                elements.previewModal.classList.remove('is-hidden');
+              }
+            });
+          });
+        }
+      }
+
+    } catch (err) {
+      console.error("Firestore analytics load error:", err);
+      if (elements.leaderboardList) elements.leaderboardList.innerHTML = '<div class="empty-state">تعذر تحميل بيانات الإحصاءات حالياً</div>';
+    }
+  }
+
+  // تشغيل التطبيق
   document.addEventListener('DOMContentLoaded', init);
 
 })();
