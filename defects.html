@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>سجل بلاغات الأعطال والفقدان | نادي جسور</title>
+  
+  <!-- خط Cairo المعتمد للنادي -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* تخصيصات إضافية لسجل الأعطال */
+    .defect-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-size: 12.5px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .btn-back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      color: var(--gold-light);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      transition: all 0.2s ease;
+      margin-bottom: 16px;
+    }
+
+    .btn-back-nav:hover {
+      background: var(--gold-accent);
+      color: #040711;
+      transform: translateY(-2px);
+    }
+
+    .type-pill-selector {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .type-pill-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13.5px;
+      color: var(--text-main);
+      transition: all 0.25s ease;
+    }
+
+    .type-pill-option input[type="radio"] {
+      display: none;
+    }
+
+    .type-pill-option.active-defect {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+    }
+
+    .type-pill-option.active-loss {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    }
+
+    .defect-records-container {
+      margin-top: 24px;
+    }
+
+    .defect-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .defect-card:hover {
+      border-color: var(--gold-accent);
+      transform: translateY(-2px);
+    }
+
+    .defect-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .defect-type-tag {
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .tag-defect {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .tag-loss {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .defect-status-tag {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(234, 179, 8, 0.12);
+      color: var(--gold-light);
+      border: 1px solid var(--border-color);
+    }
+
+    .defect-grid-details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    @media (min-width: 600px) {
+      .defect-grid-details {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .defect-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .defect-detail-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .defect-detail-val {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .search-filter-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .search-filter-box input {
+      flex: 1;
+      min-width: 180px;
+    }
+  </style>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Firebase Cloud Firestore SDK (v9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- زر العودة السريع لاستمارة التقرير -->
+    <a href="index.html" class="btn-back-nav" id="btnBackToReport">
+      <span>⬅️</span>
+      <span>العودة إلى استمارة تقرير المداومة</span>
+    </a>
+
+    <!-- الترويسة الرسمية -->
+    <header class="app-header">
+      <div class="header-seal-wrap">
+        <img src="logo.png" alt="شعار نادي جسور" class="header-logo" width="68" height="68" style="width: 68px !important; height: 68px !important; border-radius: 50%;">
+      </div>
+      
+      <div class="header-titles">
+        <span class="defect-header-badge">⚠️ المنظومة الرقابية للأوقاف والعتاد</span>
+        <h1 class="main-title">سجل بلاغات الأعطال والفقدان</h1>
+        <p class="sub-title">نادي جسور الطلابي • كلية العلوم الإسلامية (جامعة الجزائر 1)</p>
+      </div>
+
+      <!-- شريط معلومات اليوم والتاريخ -->
+      <div class="meta-strip">
+        <div class="meta-item">
+          <span class="meta-icon">📅</span>
+          <span id="displayDate">--/--/2026</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🗓️</span>
+          <span id="displayDay">الأحد</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🏢</span>
+          <span>خلية المداومة والعمليات</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- بطاقة التنبيه الإداري الإلزامي -->
+    <div class="card section-card" style="border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, var(--card-bg) 100%);">
+      <div class="card-header">
+        <div class="card-icon-badge" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">⚠️</div>
+        <div class="card-header-text">
+          <h2 style="color: #fca5a5;">ميثاق الأمانة والمسؤولية</h2>
+          <p>بصفتك المداوم أو العضو المسؤول، يجب تسجيل أي عطل أو نقص أو فقدان في ممتلكات النادي بدقة كاملة وبلا لوم، صيانةً للأوقاف وتسهيلاً للمعالجة السريعة.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- استمارة تسجيل بلاغ جديد -->
+    <form id="defectForm" class="card section-card">
+      <div class="card-header">
+        <div class="card-icon-badge">📝</div>
+        <div class="card-header-text">
+          <h2>تسجيل بلاغ عطل أو فقدان جديد</h2>
+          <p>يرجى إدخال كافة البيانات المتعلقة بالحادثة أو الخلل</p>
+        </div>
+      </div>
+
+      <!-- 1. نوع البلاغ -->
+      <div class="form-group">
+        <label class="field-label required-label">📌 نوع البلاغ:</label>
+        <div class="type-pill-selector">
+          <label class="type-pill-option active-defect" id="pillDefect">
+            <input type="radio" name="incidentType" value="بلاغ عطل" checked>
+            <span>⚠️ بلاغ عطل في عتاد</span>
+          </label>
+          <label class="type-pill-option" id="pillLoss">
+            <input type="radio" name="incidentType" value="بلاغ فقدان">
+            <span>🔍 بلاغ فقدان مقتنى</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <!-- 2. اسم المسؤول / المبلّغ -->
+        <div class="form-group">
+          <label for="reporterName" class="field-label required-label">👤 اسم المسؤول / المبلّغ:</label>
+          <input type="text" id="reporterName" class="form-control" placeholder="اكتب اسمك الكامل..." required>
+        </div>
+
+        <!-- 3. تاريخ وتوقيت البلاغ -->
+        <div class="form-group">
+          <label for="incidentDate" class="field-label required-label">📅 تاريخ البلاغ:</label>
+          <input type="date" id="incidentDate" class="form-control" required>
+        </div>
+      </div>
+
+      <!-- 4. العتاد أو الغرض المعني -->
+      <div class="form-group">
+        <label for="incidentItem" class="field-label required-label">📦 العتاد أو الغرض المعني:</label>
+        <input type="text" id="incidentItem" class="form-control" placeholder="مثال: جهاز العرض (Data Show)، ميكروفون، كابل، طابعة، مفتاح المقر..." required>
+      </div>
+
+      <!-- 5. وصف العطل أو سبب وملابسات الفقدان -->
+      <div class="form-group">
+        <label for="incidentDescription" class="field-label required-label">📝 وصف الخلل أو ملابسات الفقدان بالتفصيل:</label>
+        <textarea id="incidentDescription" class="form-control form-textarea" rows="3" placeholder="اشرح بدقة ما الذي حدث وكيف اكتُشف الخلل أو الفقدان..." required></textarea>
+      </div>
+
+      <div class="form-grid">
+        <!-- 6. الإجراءات المتخذة الأولية -->
+        <div class="form-group">
+          <label for="actionTaken" class="field-label required-label">🛠️ الإجراءات المتخذة الأولية:</label>
+          <select id="actionTaken" class="form-control form-select" required>
+            <option value="تم إبلاغ مسؤولة المداومة والإدارة فوراً">تم إبلاغ مسؤولة المداومة والإدارة فوراً</option>
+            <option value="تم التحويل للصيانة والإصلاح">تم التحويل للصيانة والإصلاح</option>
+            <option value="سيتم التعويض من قِبل العضو المسؤول">سيتم التعويض من قِبل العضو المسؤول</option>
+            <option value="تم البحث وجاري التعقب والتحري">تم البحث وجاري التعقب والتحري</option>
+            <option value="رفع الأمر إلى المكتب التنفيذي">رفع الأمر إلى المكتب التنفيذي</option>
+            <option value="عزل الجهاز لتفادي تفاقم العطل">عزل الجهاز لتفادي تفاقم العطل</option>
+          </select>
+        </div>
+
+        <!-- 7. الحالة النهائية -->
+        <div class="form-group">
+          <label for="incidentStatus" class="field-label required-label">🏷️ الحالة الحالية للبلاغ:</label>
+          <select id="incidentStatus" class="form-control form-select" required>
+            <option value="قيد الإصلاح">قيد الإصلاح ⏳</option>
+            <option value="قيد التعويض">قيد التعويض 🔄</option>
+            <option value="مسجل مفقود">مسجل مفقود 🔍</option>
+            <option value="تم الإصلاح والاسترجاع بنجاح">تم الإصلاح والاسترجاع بنجاح ✅</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- زر الإرسال -->
+      <div class="action-footer" style="margin-top: 10px;">
+        <button type="submit" class="btn btn-primary" id="btnSubmitDefect" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);">
+          <span class="btn-icon">🚀</span>
+          <span>تسجيل البلاغ في السجل السحابي المعتمد</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- سجل البلاغات السحابي الحي -->
+    <section class="card section-card defect-records-container">
+      <div class="card-header">
+        <div class="card-icon-badge">📋</div>
+        <div class="card-header-text">
+          <h2>سجل بلاغات الأعطال والفقدان المعتمد</h2>
+          <p>جميع البلاغات المسجلة في قاعدة البيانات السحابية مع تحديثاتها</p>
+        </div>
+      </div>
+
+      <!-- شريط البحث والتصفية -->
+      <div class="search-filter-box">
+        <input type="text" id="defectSearchInput" class="form-control" placeholder="🔍 ابحث باسم المسؤول، العتاد، أو الوصف...">
+        <select id="defectFilterType" class="form-control form-select" style="max-width: 160px;">
+          <option value="all">جميع البلاغات</option>
+          <option value="بلاغ عطل">الأعطال فقط</option>
+          <option value="بلاغ فقدان">الفقدان فقط</option>
+        </select>
+      </div>
+
+      <!-- قائمة السجلات -->
+      <div id="defectRecordsList">
+        <div class="empty-state">جاري تحميل البلاغات من السحابة... ⏳</div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // تهيئة تيليجرام
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.ready();
+        tg.expand();
+      }
+
+      // تهيئة Firebase Firestore
+      const firebaseConfig = {
+        apiKey: "AIzaSyAYdprBxSxDf_2mUve4EY7t5jDgo_2_Lb4",
+        authDomain: "josour-djard.firebaseapp.com",
+        projectId: "josour-djard",
+        storageBucket: "josour-djard.firebasestorage.app",
+        messagingSenderId: "830517852419",
+        appId: "1:830517852419:web:80eb5c821346aedc63d136",
+        measurementId: "G-B1VH7QBJHP"
+      };
+
+      let db = null;
+      try {
+        if (typeof firebase !== 'undefined') {
+          if (!firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+          }
+          db = firebase.firestore();
+        }
+      } catch (err) {
+        console.warn("Firebase warning:", err);
+      }
+
+      const elements = {
+        form: document.getElementById('defectForm'),
+        displayDate: document.getElementById('displayDate'),
+        displayDay: document.getElementById('displayDay'),
+        reporterName: document.getElementById('reporterName'),
+        incidentDate: document.getElementById('incidentDate'),
+        incidentItem: document.getElementById('incidentItem'),
+        incidentDescription: document.getElementById('incidentDescription'),
+        actionTaken: document.getElementById('actionTaken'),
+        incidentStatus: document.getElementById('incidentStatus'),
+        pillDefect: document.getElementById('pillDefect'),
+        pillLoss: document.getElementById('pillLoss'),
+        defectSearchInput: document.getElementById('defectSearchInput'),
+        defectFilterType: document.getElementById('defectFilterType'),
+        defectRecordsList: document.getElementById('defectRecordsList'),
+        toastContainer: document.getElementById('toastContainer')
+      };
+
+      let allRecords = [];
+
+      function init() {
+        setupDates();
+        setupTypeSelector();
+        setupFilters();
+        extractUrlParams();
+        loadDefectRecords();
+      }
+
+      function setupDates() {
+        const now = new Date();
+        const daysArabic = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        elements.displayDay.textContent = daysArabic[now.getDay()];
+
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        elements.displayDate.textContent = `${day} / ${month} / ${year}`;
+
+        // افتراضي لحقل تاريخ البلاغ
+        elements.incidentDate.value = `${year}-${month}-${day}`;
+      }
+
+      function setupTypeSelector() {
+        const radios = document.getElementsByName('incidentType');
+        Array.from(radios).forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            if (e.target.value === 'بلاغ عطل') {
+              elements.pillDefect.classList.add('active-defect');
+              elements.pillLoss.classList.remove('active-loss');
+            } else {
+              elements.pillLoss.classList.add('active-loss');
+              elements.pillDefect.classList.remove('active-defect');
+            }
+          });
+        });
+      }
+
+      function extractUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        const memberParam = params.get('member');
+        if (memberParam && !elements.reporterName.value) {
+          elements.reporterName.value = memberParam;
+        } else if (tg?.initDataUnsafe?.user) {
+          const user = tg.initDataUnsafe.user;
+          const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+          if (fullName && !elements.reporterName.value) {
+            elements.reporterName.value = fullName;
+          }
+        }
+      }
+
+      function setupFilters() {
+        elements.defectSearchInput.addEventListener('input', filterAndRenderRecords);
+        elements.defectFilterType.addEventListener('change', filterAndRenderRecords);
+      }
+
+      async function loadDefectRecords() {
+        if (!db) {
+          elements.defectRecordsList.innerHTML = '<div class="empty-state">قاعدة بيانات Firebase غير متصلة محلياً</div>';
+          return;
+        }
+
+        try {
+          db.collection("defect_reports").onSnapshot(snapshot => {
+            const records = [];
+            snapshot.forEach(doc => {
+              records.push({ id: doc.id, ...doc.data() });
+            });
+            // فرز تنازلي حسب التاريخ
+            records.sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+            allRecords = records;
+            filterAndRenderRecords();
+          }, err => {
+            console.error("Defects load error:", err);
+            elements.defectRecordsList.innerHTML = '<div class="empty-state">تعذر تحميل البلاغات من السحابة</div>';
+          });
+        } catch (err) {
+          console.error("Defects query error:", err);
+        }
+      }
+
+      function filterAndRenderRecords() {
+        const query = elements.defectSearchInput.value.trim().toLowerCase();
+        const typeFilter = elements.defectFilterType.value;
+
+        const filtered = allRecords.filter(r => {
+          const matchType = typeFilter === 'all' || r.type === typeFilter;
+          const textCorpus = `${r.reporter || ''} ${r.item || ''} ${r.description || ''} ${r.actionTaken || ''} ${r.status || ''}`.toLowerCase();
+          const matchQuery = !query || textCorpus.includes(query);
+          return matchType && matchQuery;
+        });
+
+        if (filtered.length === 0) {
+          elements.defectRecordsList.innerHTML = '<div class="empty-state">لا توجد بلاغات تطابق البحث</div>';
+          return;
+        }
+
+        elements.defectRecordsList.innerHTML = filtered.map(r => {
+          const isDefect = (r.type || '').includes('عطل');
+          const typeTagClass = isDefect ? 'tag-defect' : 'tag-loss';
+          const typeIcon = isDefect ? '⚠️' : '🔍';
+
+          return `
+            <div class="defect-card">
+              <div class="defect-card-header">
+                <span class="defect-type-tag ${typeTagClass}">${typeIcon} ${r.type || 'بلاغ'}</span>
+                <span class="defect-status-tag">${r.status || 'قيد المتابعة'}</span>
+              </div>
+              <div class="defect-grid-details">
+                <div class="defect-detail-item">
+                  <span class="defect-detail-label">👤 المسؤول / المبلّغ:</span>
+                  <span class="defect-detail-val">${r.reporter || 'غير مسجل'}</span>
+                </div>
+                <div class="defect-detail-item">
+                  <span class="defect-detail-label">📅 تاريخ البلاغ:</span>
+                  <span class="defect-detail-val">${r.date || '---'}</span>
+                </div>
+                <div class="defect-detail-item" style="grid-column: 1 / -1;">
+                  <span class="defect-detail-label">📦 العتاد أو الغرض:</span>
+                  <span class="defect-detail-val" style="color: var(--gold-light); font-size: 14px;">${r.item || '---'}</span>
+                </div>
+                <div class="defect-detail-item" style="grid-column: 1 / -1;">
+                  <span class="defect-detail-label">📝 وصف الخلل / ملابسات الفقدان:</span>
+                  <span class="defect-detail-val" style="font-weight: 500; line-height: 1.5;">${r.description || 'لا يوجد وصف'}</span>
+                </div>
+                <div class="defect-detail-item" style="grid-column: 1 / -1;">
+                  <span class="defect-detail-label">🛠️ الإجراءات المتخذة:</span>
+                  <span class="defect-detail-val" style="color: #94a3b8;">${r.actionTaken || 'قيد المتابعة'}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // إرسال البلاغ وحفظه
+      elements.form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const selectedType = document.querySelector('input[name="incidentType"]:checked')?.value || 'بلاغ عطل';
+        const reporter = elements.reporterName.value.trim();
+        const date = elements.incidentDate.value;
+        const item = elements.incidentItem.value.trim();
+        const description = elements.incidentDescription.value.trim();
+        const actionTaken = elements.actionTaken.value;
+        const status = elements.incidentStatus.value;
+
+        if (!reporter || !item || !description) {
+          showToast('⚠️ يرجى إكمال جميع الحقول الإلزامية');
+          return;
+        }
+
+        const newRecord = {
+          type: selectedType,
+          reporter: reporter,
+          date: date,
+          item: item,
+          description: description,
+          actionTaken: actionTaken,
+          status: status,
+          timestamp: new Date().toISOString(),
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+          if (db) {
+            await db.collection("defect_reports").add(newRecord);
+          }
+
+          // بث تنبيه فوري إلى تيليجرام
+          try {
+            const _k = atob("ODUwOTA5Mjg2MDpBQUVUNFdDWHJ4Mk1EMlFWYjB5clJDcWw1bEFYb3ktVWh5WQ==");
+            const tgUrl = `https://api.telegram.org/bot${_k}/sendMessage`;
+            const tgText = `⚠️ **بلاغ جديد في سجل الأعطال والفقدان الرسمي** 🏛️\n` +
+                           `#سجل_الأعطال #بلاغ_عاجل\n\n` +
+                           `📌 **نوع البلاغ:** [ ${selectedType} ]\n` +
+                           `👤 **المسؤول / المبلّغ:** [ ${reporter} ]\n` +
+                           `📅 **التاريخ:** [ ${date} ]\n` +
+                           `📦 **العتاد المعني:** [ ${item} ]\n` +
+                           `📝 **الوصف:** ${description}\n` +
+                           `🛠️ **الإجراءات الأولية:** [ ${actionTaken} ]\n` +
+                           `🏷️ **الحالة:** [ ${status} ]`;
+
+            fetch(tgUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: -1004497345814,
+                message_thread_id: 30,
+                text: tgText
+              })
+            }).catch(e => console.warn('TG broadcast error:', e));
+          } catch (tgErr) {}
+
+          showToast('✅ تم تسجيل البلاغ بنجاح في السجل الرسمي وإبلاغ الإدارة!');
+
+          // تصفير الحقول الجزئية
+          elements.incidentItem.value = '';
+          elements.incidentDescription.value = '';
+
+          // إعادة تركيز العرض على السجلات
+          elements.defectRecordsList.scrollIntoView({ behavior: 'smooth' });
+
+        } catch (err) {
+          console.error("Save error:", err);
+          showToast('❌ تعذر الحفظ، يرجى التحقق من اتصال الإنترنت');
+        }
+      });
+
+      function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        elements.toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
+</body>
+</html>
