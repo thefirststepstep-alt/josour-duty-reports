@@ -562,7 +562,7 @@
         return false;
       }
       if (!elements.defectSheetLoggedConfirm.checked) {
-        showToast('⚠️ إلزامي: يجب فتح سجل الأعطال وتسجيل الخلل ثم تفعيل الإقرار قبل إرسال التقرير!');
+        showToast('⚠️ إلزامي: يجب فتح موقع سجل الأعطال وتوثيق البلاغ ثم تفعيل الإقرار قبل الإرسال!');
         elements.defectSheetLoggedConfirm.focus();
         return false;
       }
@@ -620,15 +620,17 @@
       }
     });
 
-    // فتح رابط سجل الأعطال مباشرة في المتصفح الخارجي / تطبيق Google Sheets
+    // فتح موقع سجل الأعطال والفقدان الرسمي المعتمد
     const defectLink = document.querySelector('.btn-sheet-link');
     if (defectLink) {
       defectLink.addEventListener('click', (e) => {
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/1DmuSOLyNDck0aeBtkapptSn2KdqyVzpiS2DOI6VKFBE/edit?gid=0#gid=0";
-        if (tg && tg.openLink) {
-          e.preventDefault();
-          tg.openLink(sheetUrl);
-        }
+        e.preventDefault();
+        const memberName = elements.primaryMember.value.trim();
+        const targetUrl = memberName 
+          ? `defects.html?member=${encodeURIComponent(memberName)}`
+          : 'defects.html';
+        
+        window.location.href = targetUrl;
       });
     }
 
