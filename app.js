@@ -689,10 +689,12 @@
       }
     }
 
-    // 3. النشر الفوري المباشر في مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة" (Topic 30)
+    // 3. النشر الفوري المباشر للتقرير في المجموعات المعتمدة (حقيبة نشطاء جسور + نشطاء جسور 7)
     try {
       const _k = atob("ODUwOTA5Mjg2MDpBQUVUNFdDWHJ4Mk1EMlFWYjB5clJDcWw1bEFYb3ktVWh5WQ==");
       const tgUrl = `https://api.telegram.org/bot${_k}/sendMessage`;
+
+      // أ) الإرسال إلى مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة" (Topic 30)
       fetch(tgUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -703,10 +705,27 @@
         })
       }).then(res => res.json()).then(resData => {
         if (resData.ok) {
-          showToast('📢 تم إرسال التقرير فوراً إلى حقيبة نشطاء جسور!');
+          console.log("Duty report sent to Haqiba (Topic 30) ✅");
         }
       }).catch(tgErr => {
-        console.warn("Direct Telegram post notice:", tgErr);
+        console.warn("Direct Telegram post notice (Haqiba):", tgErr);
+      });
+
+      // ب) الإرسال التلقائي المباشر إلى مجموعة "نُشَطَاء جُسُور |7|" (بدون topic)
+      fetch(tgUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: -1002534160494,
+          text: formattedText
+        })
+      }).then(res => res.json()).then(resData => {
+        if (resData.ok) {
+          console.log("Duty report sent to Josour 7 ✅");
+          showToast('📢 تم إرسال ونشر التقرير فوراً في حقيبة نشطاء جسور ونشطاء جسور 7!');
+        }
+      }).catch(tgErr => {
+        console.warn("Direct Telegram post notice (Josour 7):", tgErr);
       });
     } catch (err) {
       console.warn("Direct Telegram broadcast error:", err);
