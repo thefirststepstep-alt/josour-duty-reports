@@ -788,6 +788,11 @@
   // ==========================================
   const DEFAULT_WEEKLY_SCHEDULE = [
     {
+      day: 'السبت',
+      morning: { primary: 'عضو مداوم', username: '', assistant: '---' },
+      evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
+    },
+    {
       day: 'الأحد',
       morning: { primary: 'آية', username: 'Ayazaidi', assistant: '---' },
       evening: { primary: 'عضو مداوم', username: '', assistant: '---' }
