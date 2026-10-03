@@ -600,6 +600,7 @@
                            `🛠️ **الإجراءات الأولية:** [ ${actionTaken} ]\n` +
                            `🏷️ **الحالة:** [ ${status} ]`;
 
+            // أ) الإرسال إلى مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة و الابلاغ" (Topic ID: 30)
             fetch(tgUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -608,7 +609,17 @@
                 message_thread_id: 30,
                 text: tgText
               })
-            }).catch(e => console.warn('TG broadcast error:', e));
+            }).catch(e => console.warn('TG broadcast error (Haqiba):', e));
+
+            // ب) الإرسال الفوري المباشر إلى مجموعة "نُشَطَاء جُسُور |7|" (بدون topic)
+            fetch(tgUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: -1002534160494,
+                text: tgText
+              })
+            }).catch(e => console.warn('TG broadcast error (Josour 7):', e));
           } catch (tgErr) {}
 
           showToast('✅ تم تسجيل البلاغ بنجاح في السجل الرسمي وإبلاغ الإدارة!');
