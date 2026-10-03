@@ -188,6 +188,63 @@
       flex: 1;
       min-width: 180px;
     }
+
+    .btn-delete-record {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: var(--radius-sm);
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-delete-record:hover {
+      background: #ef4444;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    }
+
+    .notice-card-footer {
+      background: linear-gradient(180deg, rgba(17, 30, 51, 0.95) 0%, rgba(5, 11, 20, 0.98) 100%);
+      border: 1.5px solid rgba(234, 179, 8, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-top: 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .notice-card-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .notice-card-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .notice-card-text h3 {
+      color: var(--gold-light);
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .notice-card-text p {
+      color: #cbd5e1;
+      font-size: 12.5px;
+      line-height: 1.7;
+      margin: 0;
+    }
   </style>
 
   <!-- Telegram WebApp SDK -->
@@ -214,7 +271,7 @@
       </div>
       
       <div class="header-titles">
-        <span class="defect-header-badge">⚠️ المنظومة الرقابية للأوقاف والعتاد</span>
+        <span class="defect-header-badge">🛡️ المنظومة الحفاظية على أوقاف النادي</span>
         <h1 class="main-title">سجل بلاغات الأعطال والفقدان</h1>
         <p class="sub-title">نادي جسور الطلابي • كلية العلوم الإسلامية (جامعة الجزائر 1)</p>
       </div>
@@ -273,10 +330,10 @@
       </div>
 
       <div class="form-grid">
-        <!-- 2. اسم المسؤول / المبلّغ -->
+        <!-- 2. اسم المبلّغ أو المسؤول عن العطل أو الفقدان -->
         <div class="form-group">
-          <label for="reporterName" class="field-label required-label">👤 اسم المسؤول / المبلّغ:</label>
-          <input type="text" id="reporterName" class="form-control" placeholder="اكتب اسمك الكامل..." required>
+          <label for="reporterName" class="field-label required-label">👤 اسم المبلّغ أو المسؤول عن العطل أو الفقدان:</label>
+          <input type="text" id="reporterName" class="form-control" placeholder="اكتب اسم المبلّغ أو المسؤول هنا..." required>
         </div>
 
         <!-- 3. تاريخ وتوقيت البلاغ -->
@@ -298,38 +355,23 @@
         <textarea id="incidentDescription" class="form-control form-textarea" rows="3" placeholder="اشرح بدقة ما الذي حدث وكيف اكتُشف الخلل أو الفقدان..." required></textarea>
       </div>
 
-      <div class="form-grid">
-        <!-- 6. الإجراءات المتخذة الأولية -->
-        <div class="form-group">
-          <label for="actionTaken" class="field-label required-label">🛠️ الإجراءات المتخذة الأولية:</label>
-          <select id="actionTaken" class="form-control form-select" required>
-            <option value="تم إبلاغ مسؤولة المداومة والإدارة فوراً">تم إبلاغ مسؤولة المداومة والإدارة فوراً</option>
-            <option value="تم التحويل للصيانة والإصلاح">تم التحويل للصيانة والإصلاح</option>
-            <option value="سيتم التعويض من قِبل العضو المسؤول">سيتم التعويض من قِبل العضو المسؤول</option>
-            <option value="تم البحث وجاري التعقب والتحري">تم البحث وجاري التعقب والتحري</option>
-            <option value="رفع الأمر إلى المكتب التنفيذي">رفع الأمر إلى المكتب التنفيذي</option>
-            <option value="عزل الجهاز لتفادي تفاقم العطل">عزل الجهاز لتفادي تفاقم العطل</option>
-          </select>
-        </div>
-
-        <!-- 7. الحالة النهائية -->
-        <div class="form-group">
-          <label for="incidentStatus" class="field-label required-label">🏷️ الحالة الحالية للبلاغ:</label>
-          <select id="incidentStatus" class="form-control form-select" required>
-            <option value="قيد الإصلاح">قيد الإصلاح ⏳</option>
-            <option value="قيد التعويض">قيد التعويض 🔄</option>
-            <option value="مسجل مفقود">مسجل مفقود 🔍</option>
-            <option value="تم الإصلاح والاسترجاع بنجاح">تم الإصلاح والاسترجاع بنجاح ✅</option>
-          </select>
-        </div>
-      </div>
-
       <!-- زر الإرسال -->
       <div class="action-footer" style="margin-top: 10px;">
         <button type="submit" class="btn btn-primary" id="btnSubmitDefect" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);">
           <span class="btn-icon">🚀</span>
           <span>تسجيل البلاغ في السجل السحابي المعتمد</span>
         </button>
+      </div>
+
+      <!-- ملاحظة التنبيه والإجراءات الحفاظية على أوقاف النادي -->
+      <div class="notice-card-footer">
+        <div class="notice-card-content">
+          <div class="notice-card-icon">⚖️</div>
+          <div class="notice-card-text">
+            <h3>تنبيه وإجراءات المحافظة على أوقاف النادي</h3>
+            <p>سيتم اتخاذ الإجراءات المناسبة وفقًا للقوانين المنصوص عليها في ملف المحافظة على أوقاف النادي، وسيتم إبلاغكم بالإجراءات التي ستُتخذ من أجل الحفاظ على أوقاف الله تعالى وعلى ما استؤمنا عليه.</p>
+          </div>
+        </div>
       </div>
     </form>
 
@@ -405,8 +447,6 @@
         incidentDate: document.getElementById('incidentDate'),
         incidentItem: document.getElementById('incidentItem'),
         incidentDescription: document.getElementById('incidentDescription'),
-        actionTaken: document.getElementById('actionTaken'),
-        incidentStatus: document.getElementById('incidentStatus'),
         pillDefect: document.getElementById('pillDefect'),
         pillLoss: document.getElementById('pillLoss'),
         defectSearchInput: document.getElementById('defectSearchInput'),
@@ -504,7 +544,7 @@
 
         const filtered = allRecords.filter(r => {
           const matchType = typeFilter === 'all' || r.type === typeFilter;
-          const textCorpus = `${r.reporter || ''} ${r.item || ''} ${r.description || ''} ${r.actionTaken || ''} ${r.status || ''}`.toLowerCase();
+          const textCorpus = `${r.reporter || ''} ${r.item || ''} ${r.description || ''}`.toLowerCase();
           const matchQuery = !query || textCorpus.includes(query);
           return matchType && matchQuery;
         });
@@ -523,11 +563,14 @@
             <div class="defect-card">
               <div class="defect-card-header">
                 <span class="defect-type-tag ${typeTagClass}">${typeIcon} ${r.type || 'بلاغ'}</span>
-                <span class="defect-status-tag">${r.status || 'قيد المتابعة'}</span>
+                <button type="button" class="btn-delete-record" onclick="window.deleteDefectRecord('${r.id}')">
+                  <span>🗑️</span>
+                  <span>حذف البلاغ</span>
+                </button>
               </div>
               <div class="defect-grid-details">
                 <div class="defect-detail-item">
-                  <span class="defect-detail-label">👤 المسؤول / المبلّغ:</span>
+                  <span class="defect-detail-label">👤 المبلّغ أو المسؤول:</span>
                   <span class="defect-detail-val">${r.reporter || 'غير مسجل'}</span>
                 </div>
                 <div class="defect-detail-item">
@@ -535,22 +578,35 @@
                   <span class="defect-detail-val">${r.date || '---'}</span>
                 </div>
                 <div class="defect-detail-item" style="grid-column: 1 / -1;">
-                  <span class="defect-detail-label">📦 العتاد أو الغرض:</span>
+                  <span class="defect-detail-label">📦 العتاد أو الغرض المعني:</span>
                   <span class="defect-detail-val" style="color: var(--gold-light); font-size: 14px;">${r.item || '---'}</span>
                 </div>
                 <div class="defect-detail-item" style="grid-column: 1 / -1;">
-                  <span class="defect-detail-label">📝 وصف الخلل / ملابسات الفقدان:</span>
+                  <span class="defect-detail-label">📝 وصف الخلل أو ملابسات الفقدان:</span>
                   <span class="defect-detail-val" style="font-weight: 500; line-height: 1.5;">${r.description || 'لا يوجد وصف'}</span>
-                </div>
-                <div class="defect-detail-item" style="grid-column: 1 / -1;">
-                  <span class="defect-detail-label">🛠️ الإجراءات المتخذة:</span>
-                  <span class="defect-detail-val" style="color: #94a3b8;">${r.actionTaken || 'قيد المتابعة'}</span>
                 </div>
               </div>
             </div>
           `;
         }).join('');
       }
+
+      // دالة حذف البلاغ من قاعدة البيانات السحابية
+      window.deleteDefectRecord = async function(docId) {
+        if (!docId) return;
+        const confirmed = confirm('هل أنتِ متأكدة من حذف هذا البلاغ نهائياً من قاعدة البيانات السحابية؟');
+        if (!confirmed) return;
+
+        try {
+          if (db) {
+            await db.collection("defect_reports").doc(docId).delete();
+            showToast('🗑️ تم حذف البلاغ بنجاح من قاعدة البيانات');
+          }
+        } catch (err) {
+          console.error("Delete error:", err);
+          showToast('❌ تعذر الحذف، يرجى التحقق من اتصال الإنترنت');
+        }
+      };
 
       // إرسال البلاغ وحفظه
       elements.form.addEventListener('submit', async (e) => {
@@ -561,8 +617,6 @@
         const date = elements.incidentDate.value;
         const item = elements.incidentItem.value.trim();
         const description = elements.incidentDescription.value.trim();
-        const actionTaken = elements.actionTaken.value;
-        const status = elements.incidentStatus.value;
 
         if (!reporter || !item || !description) {
           showToast('⚠️ يرجى إكمال جميع الحقول الإلزامية');
@@ -575,8 +629,6 @@
           date: date,
           item: item,
           description: description,
-          actionTaken: actionTaken,
-          status: status,
           timestamp: new Date().toISOString(),
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -590,15 +642,14 @@
           try {
             const _k = atob("ODUwOTA5Mjg2MDpBQUVUNFdDWHJ4Mk1EMlFWYjB5clJDcWw1bEFYb3ktVWh5WQ==");
             const tgUrl = `https://api.telegram.org/bot${_k}/sendMessage`;
-            const tgText = `⚠️ **بلاغ جديد في سجل الأعطال والفقدان الرسمي** 🏛️\n` +
-                           `#سجل_الأعطال #بلاغ_عاجل\n\n` +
+            const tgText = `🛡️ **بلاغ جديد في المنظومة الحفاظية على أوقاف النادي** 🏛️\n` +
+                           `#سجل_الأعطال_والفقدان #أوقاف_النادي\n\n` +
                            `📌 **نوع البلاغ:** [ ${selectedType} ]\n` +
-                           `👤 **المسؤول / المبلّغ:** [ ${reporter} ]\n` +
-                           `📅 **التاريخ:** [ ${date} ]\n` +
-                           `📦 **العتاد المعني:** [ ${item} ]\n` +
-                           `📝 **الوصف:** ${description}\n` +
-                           `🛠️ **الإجراءات الأولية:** [ ${actionTaken} ]\n` +
-                           `🏷️ **الحالة:** [ ${status} ]`;
+                           `👤 **المبلّغ أو المسؤول عن العطل أو الفقدان:** [ ${reporter} ]\n` +
+                           `📅 **تاريخ البلاغ:** [ ${date} ]\n` +
+                           `📦 **العتاد أو الغرض المعني:** [ ${item} ]\n` +
+                           `📝 **وصف الخلل أو ملابسات الفقدان:**\n${description}\n\n` +
+                           `⚖️ **ملاحظة إدارية:** سيتم اتخاذ الإجراءات المناسبة وفقًا للقوانين المنصوص عليها في ملف المحافظة على أوقاف النادي، وسيتم إبلاغكم بالإجراءات المتخذة صيانةً للأمانة.`;
 
             // أ) الإرسال إلى مجموعة "حقيبة نشطاء جسور" داخل موضوع "تقارير المداومة و الابلاغ" (Topic ID: 30)
             fetch(tgUrl, {
