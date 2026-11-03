@@ -345,29 +345,31 @@
         </div>
 
         <div class="form-group">
+          <label class="field-label">🧹 هل تم كنس المقر وتنظيمه؟</label>
           <div class="radio-pill-group">
             <label class="pill-option pill-success">
-              <input type="radio" name="cleanlinessStatus" value="نظيف" checked>
+              <input type="radio" name="cleanlinessStatus" value="نعم" checked>
               <span class="pill-label">
                 <span class="icon">✨</span>
-                <span>نظيف ومرتب</span>
+                <span>نعم، تم الكنس والتنظيم</span>
               </span>
             </label>
             <label class="pill-option pill-danger">
-              <input type="radio" name="cleanlinessStatus" value="غير_نظيف">
+              <input type="radio" name="cleanlinessStatus" value="لا" onclick="document.getElementById('cleanlinessReasonBox').classList.remove('is-hidden')">
               <span class="pill-label">
-                <span class="icon">🧹</span>
-                <span>غير نظيف / يحتاج عناية</span>
+                <span class="icon">❌</span>
+                <span>لا</span>
               </span>
             </label>
           </div>
 
-          <!-- خانة مشروطة لتوضيح عدم النظافة -->
+          <!-- خانة مشروطة لذكر السبب إن لم يتم الكنس -->
           <div class="conditional-box is-hidden" id="cleanlinessReasonBox">
-            <label for="cleanlinessDetails" class="field-label warning-text">🧹 وضح حالة المقر وما سبب عدم النظافة بالتفصيل:</label>
-            <textarea id="cleanlinessDetails" class="form-control form-textarea" rows="2" placeholder="اذكر النقص في النظافة ومن تسبب فيه أو ما يلزم تنظيفه..."></textarea>
+            <label for="cleanlinessDetails" class="field-label warning-text">📝 اذكر السبب:</label>
+            <textarea id="cleanlinessDetails" class="form-control form-textarea" rows="2" placeholder="اذكر سبب عدم الكنس أو التنظيم..."></textarea>
           </div>
         </div>
+      </section>
       </section>
 
       <!-- 6. 💡 احتياجات النادي والملاحظات العاجلة -->
